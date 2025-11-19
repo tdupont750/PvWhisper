@@ -107,7 +107,6 @@ internal static class Program
         logger.Info("  z = stop capture and discard audio");
         logger.Info("  x = stop capture and transcribe");
         logger.Info("  q = quit");
-        logger.Info("  Ctrl+C = quit");
     }
 
     private static void LogAvailableDevices(int deviceIndex, ILogger logger)
