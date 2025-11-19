@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace PvWhisper.Text;
 
-public sealed class TextTransformer
+public sealed class TextTransformer : ITextTransformer
 {
     private readonly List<TextTransformConfig> _transforms;
     private readonly IRegexReplacer _regexReplacer;

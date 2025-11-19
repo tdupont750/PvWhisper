@@ -1,7 +1,4 @@
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace PvWhisper.Output;
+namespace PvWhisper.Output.Publishers;
 
 public interface IOutputPublisher
 {

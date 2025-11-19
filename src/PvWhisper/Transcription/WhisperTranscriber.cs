@@ -4,7 +4,7 @@ using Whisper.net;
 
 namespace PvWhisper.Transcription;
 
-public sealed class WhisperTranscriber
+public sealed class WhisperTranscriber : IWhisperTranscriber
 {
     private const int SampleRate = 16000;
     private readonly WhisperProcessor _processor;

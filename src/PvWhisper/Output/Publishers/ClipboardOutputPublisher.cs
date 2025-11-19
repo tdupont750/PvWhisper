@@ -1,10 +1,7 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using PvWhisper.Logging;
 using TextCopy;
 
-namespace PvWhisper.Output;
+namespace PvWhisper.Output.Publishers;
 
 public sealed class ClipboardOutputPublisher : IOutputPublisher
 {

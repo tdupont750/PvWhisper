@@ -17,17 +17,17 @@ public sealed class PvWhisperApp
 {
     private readonly AppConfig _config;
     private readonly ICaptureManager _captureManager;
-    private readonly WhisperTranscriber _transcriber;
-    private readonly TextTransformer _textTransformer;
-    private readonly OutputDispatcher _outputDispatcher;
+    private readonly IWhisperTranscriber _transcriber;
+    private readonly ITextTransformer _textTransformer;
+    private readonly IOutputDispatcher _outputDispatcher;
     private readonly ILogger _logger;
 
     public PvWhisperApp(
         AppConfig config,
         ICaptureManager captureManager,
-        WhisperTranscriber transcriber,
-        TextTransformer textTransformer,
-        OutputDispatcher outputDispatcher,
+        IWhisperTranscriber transcriber,
+        ITextTransformer textTransformer,
+        IOutputDispatcher outputDispatcher,
         ILogger logger)
     {
         _config = config;
@@ -135,34 +135,29 @@ public sealed class PvWhisperApp
                     return;
                 }
 
-                if (cmd == 'v')
+                switch (cmd)
                 {
-                    if (_captureManager.IsCapturing)
-                    {
+                    case 'v' when _captureManager.IsCapturing:
                         timeoutManager.Cancel();
                         await HandleStopAndTranscribeAsync(appCts.Token);
-                    }
-                    else
-                    {
+                        break;
+                    case 'v':
                         await HandleStartCaptureAsync();
                         _ = timeoutManager.ArmAsync();
-                    }
-                }
-                else if (cmd == 'c')
-                {
-                    await HandleStartCaptureAsync();
-                    _ = timeoutManager.ArmAsync();
-                }
-                else if (cmd == 'z')
-                {
-                    timeoutManager.Cancel();
-                    await _captureManager.StopCaptureAndDiscardAsync();
-                    _logger.Info("Capture stopped; audio discarded.");
-                }
-                else if (cmd == 'x')
-                {
-                    timeoutManager.Cancel();
-                    await HandleStopAndTranscribeAsync(appCts.Token);
+                        break;
+                    case 'c':
+                        await HandleStartCaptureAsync();
+                        _ = timeoutManager.ArmAsync();
+                        break;
+                    case 'z':
+                        timeoutManager.Cancel();
+                        await _captureManager.StopCaptureAndDiscardAsync();
+                        _logger.Info("Capture stopped; audio discarded.");
+                        break;
+                    case 'x':
+                        timeoutManager.Cancel();
+                        await HandleStopAndTranscribeAsync(appCts.Token);
+                        break;
                 }
             }
         }

@@ -4,11 +4,6 @@ using System.Globalization;
 
 namespace PvWhisper.Text;
 
-public interface IRegexReplacer
-{
-    string RegexReplace(string input, string pattern, string replaceTemplate, RegexOptions options = RegexOptions.None);
-}
-
 public sealed class RegexReplacer : IRegexReplacer
 {
     /// <summary>

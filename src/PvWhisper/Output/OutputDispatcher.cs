@@ -1,4 +1,5 @@
 using PvWhisper.Config;
+using PvWhisper.Output.Publishers;
 
 namespace PvWhisper.Output;
 
@@ -6,7 +7,7 @@ namespace PvWhisper.Output;
 /// Dispatches output text to one or more configured publishers.
 /// Publishers are instantiated when the dispatcher is constructed.
 /// </summary>
-public sealed class OutputDispatcher
+public sealed class OutputDispatcher : IOutputDispatcher
 {
     private readonly IReadOnlyCollection<IOutputPublisher> _publishers;
     private readonly PvWhisper.Logging.ILogger _logger;
