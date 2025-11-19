@@ -66,7 +66,7 @@ public sealed class CaptureManager : ICaptureManager
         }
 
         if (cts != null)
-            cts.Cancel();
+            await cts.CancelAsync();
 
         if (captureTaskToWait != null)
         {
@@ -112,7 +112,7 @@ public sealed class CaptureManager : ICaptureManager
         }
 
         if (cts != null)
-            cts.Cancel();
+            await cts.CancelAsync();
 
         if (captureTaskToWait != null)
         {
@@ -150,12 +150,6 @@ public sealed class CaptureManager : ICaptureManager
 
                     _buffer.AddRange(frame);
                 }
-
-                // TODO check for overflow?
-                /*if (recorder.NumOverflowedFrames > 0)
-                {
-                    Logger.Warn($"Recorder overflowed frames: {recorder.NumOverflowedFrames}");
-                }*/
             }
         }
         catch (OperationCanceledException)
@@ -174,7 +168,7 @@ public sealed class CaptureManager : ICaptureManager
 
     private void StopAndDisposeRecorderSafe()
     {
-        PvRecorder? recorderToDispose = null;
+        PvRecorder? recorderToDispose;
         lock (_lock)
         {
             recorderToDispose = _recorder;

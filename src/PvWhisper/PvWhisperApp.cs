@@ -1,5 +1,4 @@
 using System.Threading.Channels;
-using Pv;
 using PvWhisper.Audio;
 using PvWhisper.Config;
 using PvWhisper.Input;
@@ -50,23 +49,10 @@ public sealed class PvWhisperApp
 
         // Ensure console producer finishes (non-blocking source)
         await consoleProducer;
-
-        // Pipe producer may be reading a FIFO and not respond to cancellation promptly on some systems.
-        // Do a bounded await; if it doesn't finish quickly, continue shutdown.
+        
+        // Ensure pipe producer finishes (non-blocking source)
         if (pipeProducer != null)
-        {
-            _logger.Info("Waiting briefly for pipe input to stop...");
-            var completed = await Task.WhenAny(pipeProducer, Task.Delay(TimeSpan.FromSeconds(1.5)));
-            if (completed == pipeProducer)
-            {
-                // Observe any exceptions
-                await pipeProducer;
-            }
-            else
-            {
-                _logger.Warn("Pipe input did not stop promptly; continuing shutdown.");
-            }
-        }
+            await pipeProducer;
 
         return 0;
     }
@@ -129,7 +115,7 @@ public sealed class PvWhisperApp
             _config.CaptureTimeoutSeconds,
             appCts.Token,
             () => _captureManager.IsCapturing,
-            ct => HandleStopAndTranscribeAsync(ct),
+            HandleStopAndTranscribeAsync,
             _logger);
 
         while (await reader.WaitToReadAsync(appCts.Token))
@@ -145,7 +131,7 @@ public sealed class PvWhisperApp
                 {
                     timeoutManager.Cancel();
                     await _captureManager.StopCaptureAndDiscardAsync();
-                    appCts.Cancel();
+                    await appCts.CancelAsync();
                     return;
                 }
 
@@ -161,26 +147,22 @@ public sealed class PvWhisperApp
                         await HandleStartCaptureAsync();
                         _ = timeoutManager.ArmAsync();
                     }
-                    continue;
                 }
-
-                switch (cmd)
+                else if (cmd == 'c')
                 {
-                    case 'c':
-                        await HandleStartCaptureAsync();
-                        _ = timeoutManager.ArmAsync();
-                        break;
-
-                    case 'z':
-                        timeoutManager.Cancel();
-                        await _captureManager.StopCaptureAndDiscardAsync();
-                        _logger.Info("Capture stopped; audio discarded.");
-                        break;
-
-                    case 'x':
-                        timeoutManager.Cancel();
-                        await HandleStopAndTranscribeAsync(appCts.Token);
-                        break;
+                    await HandleStartCaptureAsync();
+                    _ = timeoutManager.ArmAsync();
+                }
+                else if (cmd == 'z')
+                {
+                    timeoutManager.Cancel();
+                    await _captureManager.StopCaptureAndDiscardAsync();
+                    _logger.Info("Capture stopped; audio discarded.");
+                }
+                else if (cmd == 'x')
+                {
+                    timeoutManager.Cancel();
+                    await HandleStopAndTranscribeAsync(appCts.Token);
                 }
             }
         }

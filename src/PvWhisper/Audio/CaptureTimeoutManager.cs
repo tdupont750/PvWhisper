@@ -15,9 +15,9 @@ public sealed class CaptureTimeoutManager : IDisposable
     private readonly Func<bool> _isCapturing;
     private readonly Func<CancellationToken, Task> _onTimeoutAsync;
     private readonly CancellationToken _appToken;
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
-    private int _timeoutSeconds;
+    private readonly int _timeoutSeconds;
     private CancellationTokenSource? _cts;
     private readonly ILogger _logger;
 
@@ -33,14 +33,6 @@ public sealed class CaptureTimeoutManager : IDisposable
         _isCapturing = isCapturing;
         _onTimeoutAsync = onTimeoutAsync;
         _logger = logger ?? new Logger();
-    }
-
-    /// <summary>
-    /// Updates timeout duration in seconds. Non-positive values disable the feature.
-    /// </summary>
-    public void UpdateTimeoutSeconds(int timeoutSeconds)
-    {
-        _timeoutSeconds = timeoutSeconds;
     }
 
     /// <summary>
@@ -110,18 +102,16 @@ public sealed class CaptureTimeoutManager : IDisposable
 
     private void CancelInternal()
     {
-        CancellationTokenSource? toCancel = null;
+        CancellationTokenSource? toCancel;
         lock (_lock)
         {
             toCancel = _cts;
             _cts = null;
         }
 
-        if (toCancel != null)
-        {
-            try { toCancel.Cancel(); } catch { /* ignore */ }
-            try { toCancel.Dispose(); } catch { /* ignore */ }
-        }
+        if (toCancel == null) return;
+        try { toCancel.Cancel(); } catch { /* ignore */ }
+        try { toCancel.Dispose(); } catch { /* ignore */ }
     }
 
     public void Dispose()
