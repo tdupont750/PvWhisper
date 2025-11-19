@@ -1,4 +1,3 @@
-using System;
 using System.Text.RegularExpressions;
 using System.Globalization;
 
@@ -64,10 +63,4 @@ public sealed class RegexReplacer : IRegexReplacer
 
         return result;
     }
-}
-
-public static class RegexReplacerExtensions
-{
-    public static string RegexReplace(this string input, IRegexReplacer replacer, string pattern, string replaceTemplate, RegexOptions options = RegexOptions.None)
-        => replacer.RegexReplace(input, pattern, replaceTemplate, options);
 }
