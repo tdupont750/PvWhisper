@@ -9,14 +9,14 @@ set -euo pipefail
 #   PROJECT   = ./PvWhisper/PvWhisper.csproj
 
 # Directory of the currently executing script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 PIPE_PATH="${1:-/tmp/pvwhisper.fifo}"
 
 # Use the script directory as the root path for the project
-PROJECT_PATH="${2:-"$SCRIPT_DIR/PvWhisper/PvWhisper.csproj"}"
+PROJECT_PATH="${2:-"$ROOT_DIR/src/PvWhisper/PvWhisper.csproj"}"
 
-echo "[INFO] Script directory: $SCRIPT_DIR"
+echo "[INFO] Script directory: $ROOT_DIR"
 echo "[INFO] Using pipe:       $PIPE_PATH"
 echo "[INFO] Using project:    $PROJECT_PATH"
 
@@ -30,14 +30,13 @@ if [[ ! -p "$PIPE_PATH" ]]; then
   echo "[INFO] Creating named pipe..."
   mkfifo "$PIPE_PATH"
 else
-  echo "[INFO] Named pipe already exists."
+  echo "[WARN] Named pipe already exists."
 fi
 
 # Optional: show how to send commands to it
 echo "[INFO] In another terminal, you can send commands like:"
-echo "       echo -n 'v' > '$PIPE_PATH'   # toggle capture"
-echo "       echo -n 'q' > '$PIPE_PATH'   # quit"
-echo
+echo "[INFO] echo -n 'v' > '$PIPE_PATH'   # toggle capture"
+echo "[INFO] echo -n 'q' > '$PIPE_PATH'   # quit"
 
 # Run the .NET project. Configuration is read from AppConfig.json only.
 set +e

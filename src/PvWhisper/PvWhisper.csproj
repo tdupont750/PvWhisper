@@ -15,7 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="AppConfig.json">
+    <Content Include="..\..\AppConfig.json">
+      <Link>AppConfig.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
