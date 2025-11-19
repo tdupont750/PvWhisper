@@ -53,10 +53,28 @@ public sealed class PvWhisperApp
             appCts,
             _logger);
 
+        // Signal producers that no more writes are accepted
         channel.Writer.TryComplete();
+
+        // Ensure console producer finishes (non-blocking source)
         await consoleProducer;
+
+        // Pipe producer may be reading a FIFO and not respond to cancellation promptly on some systems.
+        // Do a bounded await; if it doesn't finish quickly, continue shutdown.
         if (pipeProducer != null)
-            await pipeProducer;
+        {
+            _logger.Info("Waiting briefly for pipe input to stop...");
+            var completed = await Task.WhenAny(pipeProducer, Task.Delay(TimeSpan.FromSeconds(1.5)));
+            if (completed == pipeProducer)
+            {
+                // Observe any exceptions
+                await pipeProducer;
+            }
+            else
+            {
+                _logger.Warn("Pipe input did not stop promptly; continuing shutdown.");
+            }
+        }
 
         return 0;
     }
