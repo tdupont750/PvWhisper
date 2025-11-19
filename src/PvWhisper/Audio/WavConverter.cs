@@ -2,12 +2,12 @@ using System.Text;
 
 namespace PvWhisper.Audio;
 
-public interface IWavHelper
+public interface IWavConverter
 {
     MemoryStream CreateWavFromPcm16(short[] samples, int sampleRate);
 }
 
-public sealed class WavHelper : IWavHelper
+public sealed class WavConverter : IWavConverter
 {
     public MemoryStream CreateWavFromPcm16(short[] samples, int sampleRate)
     {

@@ -4,12 +4,7 @@ using PvWhisper.Logging;
 
 namespace PvWhisper.Transcription;
 
-public interface IModelEnsurer
-{
-    Task<string> EnsureModelAsync(ModelKind modelKind, string modelDir, CancellationToken token);
-}
-
-public sealed class ModelEnsurer : IModelEnsurer
+public sealed class ModelEnsurer
 {
     private readonly ILogger _logger;
 

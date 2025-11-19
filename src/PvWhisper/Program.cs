@@ -59,7 +59,7 @@ internal static class Program
                 .WithThreads(8)
                 .Build();
 
-            var wavHelper = new WavHelper();
+            var wavHelper = new WavConverter();
             var transcriber = new WhisperTranscriber(processor, wavHelper);
             var outputDispatcher = new OutputDispatcher(config.Outputs, logger);
             var regexReplacer = new RegexReplacer();

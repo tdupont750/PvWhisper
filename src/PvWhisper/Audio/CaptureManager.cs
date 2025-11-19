@@ -3,7 +3,7 @@ using PvWhisper.Logging;
 
 namespace PvWhisper.Audio;
 
-public sealed class CaptureManager
+public sealed class CaptureManager : ICaptureManager
 {
     private PvRecorder? _recorder;
     private readonly int _deviceIndex;

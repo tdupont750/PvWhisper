@@ -4,12 +4,7 @@ using PvWhisper.Logging;
 
 namespace PvWhisper.Config;
 
-public interface IConfigService
-{
-    AppConfig Load();
-}
-
-public sealed class ConfigService : IConfigService
+public sealed class ConfigService
 {
     private readonly ILogger _logger;
 
