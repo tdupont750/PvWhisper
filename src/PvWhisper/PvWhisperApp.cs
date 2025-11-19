@@ -124,11 +124,9 @@ public sealed class PvWhisperApp
             {
                 var cmd = char.ToLowerInvariant(raw);
 
-                if (cmd is not ('c' or 'z' or 'x' or 'q' or 'v'))
-                    continue;
-
                 if (cmd == 'q')
                 {
+                    _logger.Info("Stopping...");
                     timeoutManager.Cancel();
                     await _captureManager.StopCaptureAndDiscardAsync();
                     await appCts.CancelAsync();
@@ -157,6 +155,9 @@ public sealed class PvWhisperApp
                     case 'x':
                         timeoutManager.Cancel();
                         await HandleStopAndTranscribeAsync(appCts.Token);
+                        break;
+                    default:
+                        _logger.Warn($"Unknown command: '{cmd}'");
                         break;
                 }
             }
