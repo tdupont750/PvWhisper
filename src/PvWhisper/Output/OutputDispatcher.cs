@@ -9,13 +9,15 @@ namespace PvWhisper.Output;
 public sealed class OutputDispatcher
 {
     private readonly IReadOnlyCollection<IOutputPublisher> _publishers;
+    private readonly PvWhisper.Logging.ILogger _logger;
 
-    public OutputDispatcher(IReadOnlyCollection<OutputTarget> targets)
+    public OutputDispatcher(IReadOnlyCollection<OutputTarget> targets, PvWhisper.Logging.ILogger logger)
     {
         if (targets == null || targets.Count == 0)
         {
             throw new ArgumentException("At least one output target must be specified.", nameof(targets));
         }
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         // Instantiate publishers for the provided targets (deduplicate targets)
         _publishers = targets
@@ -32,11 +34,11 @@ public sealed class OutputDispatcher
         }
     }
 
-    private static IOutputPublisher CreatePublisher(OutputTarget target) => target switch
+    private IOutputPublisher CreatePublisher(OutputTarget target) => target switch
     {
         OutputTarget.Console => new ConsoleOutputPublisher(),
-        OutputTarget.Clipboard => new ClipboardOutputPublisher(),
-        OutputTarget.Ydotool => new YdotoolOutputPublisher(),
+        OutputTarget.Clipboard => new ClipboardOutputPublisher(_logger),
+        OutputTarget.Ydotool => new YdotoolOutputPublisher(_logger),
         _ => throw new ArgumentOutOfRangeException(nameof(target), target, "Unknown output target")
     };
 }

@@ -5,10 +5,12 @@ namespace PvWhisper.Text;
 public sealed class TextTransformer
 {
     private readonly List<TextTransformConfig> _transforms;
+    private readonly IRegexReplacer _regexReplacer;
 
-    public TextTransformer(IEnumerable<TextTransformConfig>? transforms)
+    public TextTransformer(IEnumerable<TextTransformConfig>? transforms, IRegexReplacer? regexReplacer = null)
     {
         _transforms = transforms?.Where(t => t != null).ToList() ?? new List<TextTransformConfig>();
+        _regexReplacer = regexReplacer ?? new RegexReplacer();
     }
     
     public string Transform(string text)
@@ -29,7 +31,7 @@ public sealed class TextTransformer
             {
                 var options = t.CaseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase;
                 // Use RegexReplacer to support advanced replacement templates
-                result = result.RegexReplace(find, replace, options);
+                result = _regexReplacer.RegexReplace(result, find, replace, options);
             }
             else
             {

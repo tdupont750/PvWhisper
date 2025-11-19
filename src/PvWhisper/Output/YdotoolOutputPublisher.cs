@@ -8,11 +8,18 @@ namespace PvWhisper.Output;
 
 public sealed class YdotoolOutputPublisher : IOutputPublisher
 {
+    private readonly ILogger _logger;
+
+    public YdotoolOutputPublisher(ILogger logger)
+    {
+        _logger = logger;
+    }
+
     public async Task PublishAsync(string text, CancellationToken token)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
-            Logger.Warn("Empty transcription; skipping ydotool write.");
+            _logger.Warn("Empty transcription; skipping ydotool write.");
             return;
         }
 
@@ -28,7 +35,7 @@ public sealed class YdotoolOutputPublisher : IOutputPublisher
         await RunYdotoolAsync("ydotool type --key-delay=3 --key-hold=2 --file=-", text, token);
     }
 
-    private static async Task RunYdotoolAsync(string command, string stdin, CancellationToken token)
+    private async Task RunYdotoolAsync(string command, string stdin, CancellationToken token)
     {
         try
         {
@@ -46,7 +53,7 @@ public sealed class YdotoolOutputPublisher : IOutputPublisher
             using var proc = Process.Start(psi);
             if (proc == null)
             {
-                Logger.Warn("Failed to start ydotool process.");
+                _logger.Warn("Failed to start ydotool process.");
                 return;
             }
 
@@ -65,16 +72,16 @@ public sealed class YdotoolOutputPublisher : IOutputPublisher
             if (proc.ExitCode != 0)
             {
                 var err = await proc.StandardError.ReadToEndAsync();
-                Logger.Warn($"ydotool exited with code {proc.ExitCode}: {err}");
+                _logger.Warn($"ydotool exited with code {proc.ExitCode}: {err}");
             }
             else
             {
-                Logger.Info("Transcription sent via ydotool.");
+                _logger.Info("Transcription sent via ydotool.");
             }
         }
         catch (Exception ex)
         {
-            Logger.Warn($"Failed to send text via ydotool: {ex.Message}");
+            _logger.Warn($"Failed to send text via ydotool: {ex.Message}");
         }
     }
 }

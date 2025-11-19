@@ -2,9 +2,14 @@ using System.Text;
 
 namespace PvWhisper.Audio;
 
-public static class WavHelper
+public interface IWavHelper
 {
-    public static MemoryStream CreateWavFromPcm16(short[] samples, int sampleRate)
+    MemoryStream CreateWavFromPcm16(short[] samples, int sampleRate);
+}
+
+public sealed class WavHelper : IWavHelper
+{
+    public MemoryStream CreateWavFromPcm16(short[] samples, int sampleRate)
     {
         var ms = new MemoryStream();
 

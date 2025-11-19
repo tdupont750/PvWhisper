@@ -4,14 +4,19 @@ using System.Globalization;
 
 namespace PvWhisper.Text;
 
-public static class RegexReplacer
+public interface IRegexReplacer
+{
+    string RegexReplace(string input, string pattern, string replaceTemplate, RegexOptions options = RegexOptions.None);
+}
+
+public sealed class RegexReplacer : IRegexReplacer
 {
     /// <summary>
     /// Replaces text in <paramref name="input"/> using a regex <paramref name="pattern"/> and a custom
     /// replacement template that supports tokens like {1}, {1:ToUpper}, {2:ToLower}.
     /// </summary>
-    public static string RegexReplace(
-        this string input,
+    public string RegexReplace(
+        string input,
         string pattern,
         string replaceTemplate,
         RegexOptions options = RegexOptions.None)
@@ -64,4 +69,10 @@ public static class RegexReplacer
 
         return result;
     }
+}
+
+public static class RegexReplacerExtensions
+{
+    public static string RegexReplace(this string input, IRegexReplacer replacer, string pattern, string replaceTemplate, RegexOptions options = RegexOptions.None)
+        => replacer.RegexReplace(input, pattern, replaceTemplate, options);
 }

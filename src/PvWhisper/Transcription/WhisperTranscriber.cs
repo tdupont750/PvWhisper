@@ -8,10 +8,12 @@ public sealed class WhisperTranscriber
 {
     private const int SampleRate = 16000;
     private readonly WhisperProcessor _processor;
+    private readonly IWavHelper _wavHelper;
 
-    public WhisperTranscriber(WhisperProcessor processor)
+    public WhisperTranscriber(WhisperProcessor processor, IWavHelper? wavHelper = null)
     {
         _processor = processor ?? throw new ArgumentNullException(nameof(processor));
+        _wavHelper = wavHelper ?? new WavHelper();
     }
 
     public async Task<string> TranscribeAsync(short[] samples, CancellationToken token)
@@ -19,7 +21,7 @@ public sealed class WhisperTranscriber
         if (samples == null || samples.Length == 0)
             return string.Empty;
 
-        using var wavStream = WavHelper.CreateWavFromPcm16(samples, SampleRate);
+        using var wavStream = _wavHelper.CreateWavFromPcm16(samples, SampleRate);
         var sb = new StringBuilder();
 
         await foreach (var segment in _processor.ProcessAsync(wavStream, token))

@@ -4,8 +4,20 @@ using PvWhisper.Logging;
 
 namespace PvWhisper.Config;
 
-public static class ConfigService
+public interface IConfigService
 {
+    AppConfig Load();
+}
+
+public sealed class ConfigService : IConfigService
+{
+    private readonly ILogger _logger;
+
+    public ConfigService(ILogger logger)
+    {
+        _logger = logger;
+    }
+
     private static string? ExpandPath(string? path)
     {
         if (string.IsNullOrWhiteSpace(path))
@@ -31,7 +43,7 @@ public static class ConfigService
         return path;
     }
 
-    public static AppConfig Load()
+    public AppConfig Load()
     {
         // Locate AppConfig.json (first in CWD, then in BaseDirectory)
         var candidates = new[]
@@ -65,7 +77,7 @@ public static class ConfigService
         // Validate paths without applying defaults
         if (!string.IsNullOrWhiteSpace(config.PipePath) && !File.Exists(config.PipePath))
         {
-            Logger.Warn($"Pipe file does not exist: {config.PipePath}.");
+            _logger.Warn($"Pipe file does not exist: {config.PipePath}.");
         }
 
         // Validate model directory; if specified and doesn't exist, fail.

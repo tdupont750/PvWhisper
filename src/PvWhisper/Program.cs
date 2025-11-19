@@ -18,18 +18,21 @@ internal static class Program
     {
         Console.OutputEncoding = Encoding.UTF8;
 
+        var logger = new Logger();
+        var configService = new ConfigService(logger);
+
         AppConfig config;
         try
         {
-            config = ConfigService.Load();
+            config = configService.Load();
         }
         catch (Exception ex)
         {
-            Logger.Error($"Configuration error: {ex.Message}");
+            logger.Error($"Configuration error: {ex.Message}");
             return 1;
         }
 
-        PrintStartupInfo();
+        PrintStartupInfo(logger);
 
         using var appCts = new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) =>
@@ -40,8 +43,8 @@ internal static class Program
 
         try
         {
-            var exitCode = await RunAsync(config, appCts);
-            Logger.Info("PvWhisper stopped.");
+            var exitCode = await RunAsync(config, appCts, logger);
+            logger.Info("PvWhisper stopped.");
             return exitCode;
         }
         catch (OperationCanceledException)
@@ -50,38 +53,39 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            Logger.Error("Fatal error:");
-            Logger.Error(ex);
+            logger.Error("Fatal error:");
+            logger.Error(ex);
             return 1;
         }
 
-        Logger.Info("PvWhisper stopped.");
+        logger.Info("PvWhisper stopped.");
         return 0;
     }
 
-    private static void PrintStartupInfo()
+    private static void PrintStartupInfo(ILogger logger)
     {
-        Logger.Info("PvWhisper – PvRecorder + Whisper.net");
-        Logger.Info("Commands:");
-        Logger.Info("  v = toggle capture (start / stop + transcribe)");
-        Logger.Info("  c = start capture");
-        Logger.Info("  z = stop capture and discard audio");
-        Logger.Info("  x = stop capture and transcribe");
-        Logger.Info("  q = quit");
-        Logger.Info("  Ctrl+C = quit");
+        logger.Info("PvWhisper – PvRecorder + Whisper.net");
+        logger.Info("Commands:");
+        logger.Info("  v = toggle capture (start / stop + transcribe)");
+        logger.Info("  c = start capture");
+        logger.Info("  z = stop capture and discard audio");
+        logger.Info("  x = stop capture and transcribe");
+        logger.Info("  q = quit");
+        logger.Info("  Ctrl+C = quit");
     }
 
-    private static async Task<int> RunAsync(AppConfig config, CancellationTokenSource appCts)
+    private static async Task<int> RunAsync(AppConfig config, CancellationTokenSource appCts, ILogger logger)
     {
         // Require explicit model directory; do not create or default
         if (string.IsNullOrWhiteSpace(config.ModelDir))
         {
-            Logger.Error("Model directory is required. Set 'modelDir' in AppConfig.json.");
+            logger.Error("Model directory is required. Set 'modelDir' in AppConfig.json.");
             return 1;
         }
 
         // Ensure model exists in the provided modelDir based on ModelType
-        var modelPath = await ModelEnsurer.EnsureModelAsync(config.ModelType, config.ModelDir, appCts.Token);
+        var modelEnsurer = new ModelEnsurer(logger);
+        var modelPath = await modelEnsurer.EnsureModelAsync(config.ModelType, config.ModelDir, appCts.Token);
 
         using var whisperFactory = WhisperFactory.FromPath(modelPath);
         await using var processor = whisperFactory
@@ -90,17 +94,19 @@ internal static class Program
             .WithThreads(8)
             .Build();
 
-        var transcriber = new WhisperTranscriber(processor);
-        var outputDispatcher = new OutputDispatcher(config.Outputs);
-        var textTransformer = new TextTransformer(config.TextTransforms);
+        var wavHelper = new WavHelper();
+        var transcriber = new WhisperTranscriber(processor, wavHelper);
+        var outputDispatcher = new OutputDispatcher(config.Outputs, logger);
+        var regexReplacer = new RegexReplacer();
+        var textTransformer = new TextTransformer(config.TextTransforms, regexReplacer);
 
         var deviceIndex = config.DeviceIndex ?? -1;
 
-        LogAvailableDevices(deviceIndex);
+        LogAvailableDevices(deviceIndex, logger);
 
-        var captureManager = new CaptureManager(deviceIndex, frameLength: 512);
+        var captureManager = new CaptureManager(deviceIndex, frameLength: 512, logger);
 
-        var (channel, consoleProducer, pipeProducer) = CreateChannelAndStartProducers(config, appCts.Token);
+        var (channel, consoleProducer, pipeProducer) = CreateChannelAndStartProducers(config, appCts.Token, logger);
 
         await ProcessCommandsAsync(
             channel.Reader,
@@ -109,7 +115,8 @@ internal static class Program
             textTransformer,
             outputDispatcher,
             config,
-            appCts);
+            appCts,
+            logger);
 
         channel.Writer.TryComplete();
         await consoleProducer;
@@ -121,14 +128,15 @@ internal static class Program
 
     private static (Channel<char> channel, Task consoleProducer, Task? pipeProducer) CreateChannelAndStartProducers(
         AppConfig config,
-        CancellationToken token)
+        CancellationToken token,
+        ILogger logger)
     {
         var channel = Channel.CreateUnbounded<char>();
 
         // Console input
         var consoleSource = new ConsoleCommandSource();
         var consoleProducer = Task.Run(
-            () => ProduceCommandsAsync(consoleSource, channel.Writer, token),
+            () => ProduceCommandsAsync(consoleSource, channel.Writer, logger, token),
             token);
 
         // Optional pipe input (simultaneous)
@@ -137,33 +145,34 @@ internal static class Program
         {
             var pipeSource = new PipeCommandSource(config.PipePath);
             pipeProducer = Task.Run(
-                () => ProduceCommandsAsync(pipeSource, channel.Writer, token),
+                () => ProduceCommandsAsync(pipeSource, channel.Writer, logger, token),
                 token);
 
-            Logger.Info($"Pipe input enabled: {config.PipePath}");
+            logger.Info($"Pipe input enabled: {config.PipePath}");
         }
 
         return (channel, consoleProducer, pipeProducer);
     }
 
-    private static void LogAvailableDevices(int deviceIndex)
+    private static void LogAvailableDevices(int deviceIndex, ILogger logger)
     {
-        Logger.Debug("Available input devices:");
+        logger.Debug("Available input devices:");
         var devices = PvRecorder.GetAvailableDevices();
         for (var i = 0; i < devices.Length; i++)
         {
-            Logger.Debug($"  [{i}] {devices[i]}");
+            logger.Debug($"  [{i}] {devices[i]}");
         }
         var selectedDeviceName = (deviceIndex >= 0 && deviceIndex < devices.Length)
             ? devices[deviceIndex]
             : "System default";
-        Logger.Info($"Using device index {deviceIndex} -> {selectedDeviceName}");
+        logger.Info($"Using device index {deviceIndex} -> {selectedDeviceName}");
     }
 
 
     private static async Task ProduceCommandsAsync(
         ICommandSource source,
         ChannelWriter<char> writer,
+        ILogger logger,
         CancellationToken token)
     {
         try
@@ -180,7 +189,7 @@ internal static class Program
         }
         catch (Exception ex)
         {
-            Logger.Warn($"Command source error: {ex.Message}");
+            logger.Warn($"Command source error: {ex.Message}");
         }
     }
 
@@ -191,7 +200,8 @@ internal static class Program
         TextTransformer textTransformer,
         OutputDispatcher outputDispatcher,
         AppConfig config,
-        CancellationTokenSource appCts)
+        CancellationTokenSource appCts,
+        ILogger logger)
     {
         // Dedicated capture timeout manager
         using var timeoutManager = new CaptureTimeoutManager(
@@ -199,7 +209,7 @@ internal static class Program
             appCts.Token,
             () => captureManager.IsCapturing,
             ct => HandleStopAndTranscribeAsync(
-                captureManager, transcriber, textTransformer, outputDispatcher, ct));
+                captureManager, transcriber, textTransformer, outputDispatcher, logger, ct));
 
         while (await reader.WaitToReadAsync(appCts.Token))
         {
@@ -224,11 +234,11 @@ internal static class Program
                     {
                         timeoutManager.Cancel();
                         await HandleStopAndTranscribeAsync(
-                            captureManager, transcriber, textTransformer, outputDispatcher, appCts.Token);
+                            captureManager, transcriber, textTransformer, outputDispatcher, logger, appCts.Token);
                     }
                     else
                     {
-                        await HandleStartCaptureAsync(captureManager);
+                        await HandleStartCaptureAsync(captureManager, logger);
                         _ = timeoutManager.ArmAsync();
                     }
                     continue;
@@ -237,35 +247,35 @@ internal static class Program
                 switch (cmd)
                 {
                     case 'c':
-                        await HandleStartCaptureAsync(captureManager);
+                        await HandleStartCaptureAsync(captureManager, logger);
                         _ = timeoutManager.ArmAsync();
                         break;
 
                     case 'z':
                         timeoutManager.Cancel();
                         await captureManager.StopCaptureAndDiscardAsync();
-                        Logger.Info("Capture stopped; audio discarded.");
+                        logger.Info("Capture stopped; audio discarded.");
                         break;
 
                     case 'x':
                         timeoutManager.Cancel();
                         await HandleStopAndTranscribeAsync(
-                            captureManager, transcriber, textTransformer, outputDispatcher, appCts.Token);
+                            captureManager, transcriber, textTransformer, outputDispatcher, logger, appCts.Token);
                         break;
                 }
             }
         }
     }
 
-    private static async Task HandleStartCaptureAsync(CaptureManager captureManager)
+    private static async Task HandleStartCaptureAsync(CaptureManager captureManager, ILogger logger)
     {
         if (captureManager.IsCapturing)
         {
-            Logger.Info("Already capturing; ignoring 'c'/'v start'.");
+            logger.Info("Already capturing; ignoring 'c'/'v start'.");
             return;
         }
 
-        Logger.Info("Starting capture...");
+        logger.Info("Starting capture...");
         await captureManager.StartCaptureAsync();
     }
 
@@ -274,14 +284,15 @@ internal static class Program
         WhisperTranscriber transcriber,
         TextTransformer textTransformer,
         OutputDispatcher outputDispatcher,
+        ILogger logger,
         CancellationToken token)
     {
-        Logger.Info("Stopping capture and transcribing...");
+        logger.Info("Stopping capture and transcribing...");
         var samples = await captureManager.StopCaptureAndGetSamplesAsync();
 
         if (samples == null || samples.Length == 0)
         {
-            Logger.Info("No audio captured to transcribe.");
+            logger.Info("No audio captured to transcribe.");
             return;
         }
 
@@ -294,11 +305,11 @@ internal static class Program
         }
         catch (OperationCanceledException)
         {
-            Logger.Info("Transcription cancelled.");
+            logger.Info("Transcription cancelled.");
         }
         catch (Exception ex)
         {
-            Logger.Error($"Transcription failed: {ex.Message}");
+            logger.Error($"Transcription failed: {ex.Message}");
         }
     }
 

@@ -8,6 +8,7 @@ public sealed class CaptureManager
     private PvRecorder? _recorder;
     private readonly int _deviceIndex;
     private readonly int _frameLength;
+    private readonly ILogger _logger;
     private readonly Lock _lock = new();
 
     private List<short>? _buffer;
@@ -16,10 +17,11 @@ public sealed class CaptureManager
 
     public bool IsCapturing { get; private set; }
 
-    public CaptureManager(int deviceIndex, int frameLength)
+    public CaptureManager(int deviceIndex, int frameLength, ILogger logger)
     {
         _deviceIndex = deviceIndex;
         _frameLength = frameLength;
+        _logger = logger;
     }
 
     public Task StartCaptureAsync()
@@ -162,7 +164,7 @@ public sealed class CaptureManager
         }
         catch (Exception ex)
         {
-            Logger.Error($"Capture loop error: {ex.Message}");
+            _logger.Error($"Capture loop error: {ex.Message}");
         }
         finally
         {

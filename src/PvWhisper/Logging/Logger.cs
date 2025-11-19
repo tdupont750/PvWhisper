@@ -2,35 +2,45 @@ using System;
 
 namespace PvWhisper.Logging;
 
-/// <summary>
-/// Simple static logger that writes to console with levels.
-/// </summary>
-public static class Logger
+public interface ILogger
 {
-    public static bool DebugEnabled { get; set; } = true;
+    bool DebugEnabled { get; set; }
+    void Debug(string message);
+    void Info(string message);
+    void Warn(string message);
+    void Error(string message);
+    void Error(Exception ex);
+}
 
-    public static void Debug(string message)
+/// <summary>
+/// Console logger implementation.
+/// </summary>
+public sealed class Logger : ILogger
+{
+    public bool DebugEnabled { get; set; } = true;
+
+    public void Debug(string message)
     {
         if (!DebugEnabled) return;
         WriteInfo("DEBUG", message, isError: false);
     }
 
-    public static void Info(string message)
+    public void Info(string message)
     {
         WriteInfo("INFO", message, isError: false);
     }
 
-    public static void Warn(string message)
+    public void Warn(string message)
     {
         WriteInfo("WARN", message, isError: true);
     }
 
-    public static void Error(string message)
+    public void Error(string message)
     {
         WriteInfo("ERROR", message, isError: true);
     }
 
-    public static void Error(Exception ex)
+    public void Error(Exception ex)
     {
         WriteLine(true, ex.ToString());
     }

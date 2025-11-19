@@ -19,17 +19,20 @@ public sealed class CaptureTimeoutManager : IDisposable
 
     private int _timeoutSeconds;
     private CancellationTokenSource? _cts;
+    private readonly ILogger _logger;
 
     public CaptureTimeoutManager(
         int timeoutSeconds,
         CancellationToken appToken,
         Func<bool> isCapturing,
-        Func<CancellationToken, Task> onTimeoutAsync)
+        Func<CancellationToken, Task> onTimeoutAsync,
+        ILogger? logger = null)
     {
         _timeoutSeconds = timeoutSeconds;
         _appToken = appToken;
         _isCapturing = isCapturing;
         _onTimeoutAsync = onTimeoutAsync;
+        _logger = logger ?? new Logger();
     }
 
     /// <summary>
@@ -70,7 +73,7 @@ public sealed class CaptureTimeoutManager : IDisposable
 
             if (!localCts.IsCancellationRequested && _isCapturing())
             {
-                Logger.Warn($"Auto-stopping capture after {_timeoutSeconds} seconds...");
+                _logger.Warn($"Auto-stopping capture after {_timeoutSeconds} seconds...");
                 await _onTimeoutAsync(_appToken);
             }
         }

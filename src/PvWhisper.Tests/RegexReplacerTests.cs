@@ -6,6 +6,8 @@ namespace PvWhisper.Tests;
 
 public class RegexReplacerTests
 {
+    private static readonly IRegexReplacer Replacer = new RegexReplacer();
+
     [Fact]
     public void ReplaceWithGroups_UppercasesFirstCharAfterSpace()
     {
@@ -15,7 +17,7 @@ public class RegexReplacerTests
         var replace = "{1:ToUpper}";
 
         // Act
-        var result = input.RegexReplace(pattern, replace);
+        var result = input.RegexReplace(Replacer, pattern, replace);
 
         // Assert
         Assert.Equal("Hello world", result);
@@ -30,7 +32,7 @@ public class RegexReplacerTests
         var replace = "{1:ToLower}";
 
         // Act
-        var result = input.RegexReplace(pattern, replace);
+        var result = input.RegexReplace(Replacer, pattern, replace);
 
         // Assert
         Assert.Equal("hello World", result);
@@ -45,7 +47,7 @@ public class RegexReplacerTests
         var replace = "{1:ToLower} {2:ToUpper}";
 
         // Act
-        var result = input.RegexReplace(pattern, replace);
+        var result = input.RegexReplace(Replacer, pattern, replace);
 
         // Assert
         Assert.Equal("john DOE", result);
@@ -60,7 +62,7 @@ public class RegexReplacerTests
         var replace = "{2}-{1}";
 
         // Act
-        var result = input.RegexReplace(pattern, replace);
+        var result = input.RegexReplace(Replacer, pattern, replace);
 
         // Assert
         Assert.Equal("123-abc", result);
@@ -75,7 +77,7 @@ public class RegexReplacerTests
         var replace = "{1:ToUpper}";
 
         // Act
-        var result = input.RegexReplace(pattern, replace);
+        var result = input.RegexReplace(Replacer, pattern, replace);
 
         // Assert
         Assert.Equal(input, result);
@@ -90,7 +92,7 @@ public class RegexReplacerTests
         var replace = "{3}-{1}"; // group 3 does not exist
 
         // Act
-        var result = input.RegexReplace(pattern, replace);
+        var result = input.RegexReplace(Replacer, pattern, replace);
 
         // Assert
         // {3} becomes empty string, {1} is "abc"
@@ -102,14 +104,14 @@ public class RegexReplacerTests
     {
         // pattern
         Assert.Throws<ArgumentNullException>(() =>
-            "input".RegexReplace(null!, "{1}"));
+            "input".RegexReplace(Replacer, null!, "{1}"));
 
         // input
         Assert.Throws<ArgumentNullException>(() =>
-            RegexReplacer.RegexReplace(null!, "pattern", "{1}"));
+            Replacer.RegexReplace(null!, "pattern", "{1}"));
 
         // template
         Assert.Throws<ArgumentNullException>(() =>
-            "input".RegexReplace("pattern", null!));
+            "input".RegexReplace(Replacer, "pattern", null!));
     }
 }

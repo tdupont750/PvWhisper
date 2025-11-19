@@ -4,8 +4,20 @@ using PvWhisper.Logging;
 
 namespace PvWhisper.Transcription;
 
-public static class ModelEnsurer
+public interface IModelEnsurer
 {
+    Task<string> EnsureModelAsync(ModelKind modelKind, string modelDir, CancellationToken token);
+}
+
+public sealed class ModelEnsurer : IModelEnsurer
+{
+    private readonly ILogger _logger;
+
+    public ModelEnsurer(ILogger logger)
+    {
+        _logger = logger;
+    }
+
     private static string GetModelFileName(ModelKind modelKind)
     {
         return modelKind switch
@@ -18,7 +30,7 @@ public static class ModelEnsurer
         };
     }
 
-    public static async Task<string> EnsureModelAsync(ModelKind modelKind, string modelDir, CancellationToken token)
+    public async Task<string> EnsureModelAsync(ModelKind modelKind, string modelDir, CancellationToken token)
     {
         if (string.IsNullOrWhiteSpace(modelDir))
             throw new ArgumentException("Model directory must be provided", nameof(modelDir));
@@ -30,11 +42,11 @@ public static class ModelEnsurer
 
         if (File.Exists(fullPath))
         {
-            Logger.Debug($"Using existing model: {fullPath}");
+            _logger.Debug($"Using existing model: {fullPath}");
             return fullPath;
         }
 
-        Logger.Warn($"Model '{fullPath}' not found. Downloading Whisper {modelKind} model...");
+        _logger.Warn($"Model '{fullPath}' not found. Downloading Whisper {modelKind} model...");
 
         var ggmlType = modelKind switch
         {
@@ -49,7 +61,7 @@ public static class ModelEnsurer
         await using var fileStream = File.Open(fullPath, FileMode.Create, FileAccess.Write, FileShare.None);
         await modelStream.CopyToAsync(fileStream, token);
 
-        Logger.Info("Model downloaded.");
+        _logger.Info("Model downloaded.");
 
         return fullPath;
     }
