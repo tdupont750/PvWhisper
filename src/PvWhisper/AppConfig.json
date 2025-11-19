@@ -1,0 +1,34 @@
+{
+  "deviceIndex": -1,
+  "pipePath": "/tmp/pvwhisper.fifo",
+  "language": "en",
+  "modelType": "Base",
+  "modelDir": "~/WhisperModels",
+  "captureTimeoutSeconds": 60,
+  "textTransforms": [{
+    "description": "Capitalize first letter",
+    "find": "^(\\w)",
+    "replace": "{1:ToUpper}",
+    "caseSensitive": false,
+    "isRegex": true
+  }, {
+    "description": "Add space at start of sentence",
+    "find": "^Space\\s(\\w)",
+    "replace": " {1:ToUpper}",
+    "caseSensitive": false,
+    "isRegex": true
+  }, {
+    "description": "Replace backspace with ydotool token",
+    "find": "^Back\\s?space\\S?\\s",
+    "replace": "{ydotool:KEY_BACKSPACE} ",
+    "caseSensitive": false,
+    "isRegex": true
+  }, {
+    "description": "Remove whisper noise messages",
+    "find": "\\b[\\W+]\\b",
+    "replace": "",
+    "caseSensitive": false,
+    "isRegex": false
+  }],
+  "outputs": ["Console", "ydotool"]
+}
