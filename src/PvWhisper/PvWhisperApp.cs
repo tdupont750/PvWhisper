@@ -168,6 +168,13 @@ public sealed class PvWhisperApp
         try
         {
             var text = await _transcriber.TranscribeAsync(samples, token);
+
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                _logger.Debug("No text transcribed.");
+                return;
+            }
+            
             await _outputDispatcher.DispatchAsync(text, token);
         }
         catch (OperationCanceledException)
