@@ -7,6 +7,7 @@ using PvWhisper.Output;
 using PvWhisper.Text;
 using PvWhisper.Transcription;
 using Whisper.net;
+using PvWhisper.Input;
 
 namespace PvWhisper;
 
@@ -60,10 +61,10 @@ internal static class Program
                 .Build();
 
             var wavHelper = new WavConverter();
-            var transcriber = new WhisperTranscriber(processor, wavHelper);
-            var outputDispatcher = new OutputDispatcher(config.Outputs, logger);
             var regexReplacer = new RegexReplacer();
             var textTransformer = new TextTransformer(config.TextTransforms, regexReplacer);
+            var transcriber = new WhisperTranscriber(processor, textTransformer, wavHelper);
+            var outputDispatcher = new OutputDispatcher(config.Outputs, logger);
 
             var deviceIndex = config.DeviceIndex ?? -1;
 
@@ -71,12 +72,14 @@ internal static class Program
 
             var captureManager = new CaptureManager(deviceIndex, frameLength: 512, logger);
 
+            var commandChannelFactory = new CommandChannelFactory(config, logger);
+
             var app = new PvWhisperApp(
                 config,
                 captureManager,
                 transcriber,
-                textTransformer,
                 outputDispatcher,
+                commandChannelFactory,
                 logger);
 
             var exitCode = await app.RunAsync(appCts);

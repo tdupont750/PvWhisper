@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace PvWhisper.Input;
+namespace PvWhisper.Input.Sources;
 
 public sealed class ConsoleCommandSource : ICommandSource
 {

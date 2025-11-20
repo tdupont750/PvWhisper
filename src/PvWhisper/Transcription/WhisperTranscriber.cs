@@ -1,5 +1,6 @@
 using System.Text;
 using PvWhisper.Audio;
+using PvWhisper.Text;
 using Whisper.net;
 
 namespace PvWhisper.Transcription;
@@ -9,10 +10,12 @@ public sealed class WhisperTranscriber : IWhisperTranscriber
     private const int SampleRate = 16000;
     private readonly WhisperProcessor _processor;
     private readonly IWavConverter _wavConverter;
+    private readonly ITextTransformer _textTransformer;
 
-    public WhisperTranscriber(WhisperProcessor processor, IWavConverter? wavHelper = null)
+    public WhisperTranscriber(WhisperProcessor processor, ITextTransformer textTransformer, IWavConverter? wavHelper = null)
     {
         _processor = processor ?? throw new ArgumentNullException(nameof(processor));
+        _textTransformer = textTransformer ?? throw new ArgumentNullException(nameof(textTransformer));
         _wavConverter = wavHelper ?? new WavConverter();
     }
 
@@ -36,6 +39,8 @@ public sealed class WhisperTranscriber : IWhisperTranscriber
             sb.Append(text.Trim());
         }
 
-        return sb.ToString().Trim();
+        var raw = sb.ToString().Trim();
+        // Apply text transformation inside the transcriber to decouple callers
+        return _textTransformer.Transform(raw);
     }
 }

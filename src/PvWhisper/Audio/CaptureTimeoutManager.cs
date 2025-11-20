@@ -29,16 +29,16 @@ public sealed class CaptureTimeoutManager : IDisposable
         _appToken = appToken;
         _isCapturing = isCapturing;
         _onTimeoutAsync = onTimeoutAsync;
-        _logger = logger ?? new Logger();
+        _logger = logger;
     }
 
     /// <summary>
     /// Arms the timeout countdown. Cancels any previously armed countdown.
     /// No-op if timeoutSeconds is non-positive.
     /// </summary>
-    public Task ArmAsync()
+    public Task RestartTimeoutAsync()
     {
-        CancelInternal();
+        Cancel();
 
         if (_timeoutSeconds <= 0)
             return Task.CompletedTask;
@@ -94,11 +94,6 @@ public sealed class CaptureTimeoutManager : IDisposable
     /// </summary>
     public void Cancel()
     {
-        CancelInternal();
-    }
-
-    private void CancelInternal()
-    {
         CancellationTokenSource? toCancel;
         lock (_lock)
         {
@@ -113,6 +108,6 @@ public sealed class CaptureTimeoutManager : IDisposable
 
     public void Dispose()
     {
-        CancelInternal();
+        Cancel();
     }
 }

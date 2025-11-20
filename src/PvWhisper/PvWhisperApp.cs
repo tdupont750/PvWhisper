@@ -4,7 +4,6 @@ using PvWhisper.Config;
 using PvWhisper.Input;
 using PvWhisper.Logging;
 using PvWhisper.Output;
-using PvWhisper.Text;
 using PvWhisper.Transcription;
 
 namespace PvWhisper;
@@ -18,29 +17,30 @@ public sealed class PvWhisperApp
     private readonly AppConfig _config;
     private readonly ICaptureManager _captureManager;
     private readonly IWhisperTranscriber _transcriber;
-    private readonly ITextTransformer _textTransformer;
     private readonly IOutputDispatcher _outputDispatcher;
+    private readonly ICommandChannelFactory _commandChannelFactory;
     private readonly ILogger _logger;
 
     public PvWhisperApp(
         AppConfig config,
         ICaptureManager captureManager,
         IWhisperTranscriber transcriber,
-        ITextTransformer textTransformer,
         IOutputDispatcher outputDispatcher,
+        ICommandChannelFactory commandChannelFactory,
         ILogger logger)
     {
         _config = config;
         _captureManager = captureManager;
         _transcriber = transcriber;
-        _textTransformer = textTransformer;
         _outputDispatcher = outputDispatcher;
+        _commandChannelFactory = commandChannelFactory;
         _logger = logger;
     }
 
     public async Task<int> RunAsync(CancellationTokenSource appCts)
     {   
-        var (channel, consoleProducer, pipeProducer) = CreateChannelAndStartProducers(appCts.Token);
+        // Create channel and start input producers via injected factory
+        var (channel, consoleProducer, pipeProducer) = _commandChannelFactory.CreateChannelAndStartProducers(appCts.Token);
 
         await ProcessCommandsAsync(channel.Reader, appCts);
 
@@ -66,54 +66,6 @@ public sealed class PvWhisperApp
         return 0;
     }
 
-    private (Channel<char> channel, Task consoleProducer, Task? pipeProducer) CreateChannelAndStartProducers(
-        CancellationToken token)
-    {
-        var channel = Channel.CreateUnbounded<char>();
-
-        // Console input
-        var consoleSource = new ConsoleCommandSource();
-        var consoleProducer = Task.Run(
-            () => ProduceCommandsAsync(consoleSource, channel.Writer, token),
-            token);
-
-        // Optional pipe input (simultaneous)
-        Task? pipeProducer = null;
-        if (_config.PipePath != null)
-        {
-            var pipeSource = new PipeCommandSource(_config.PipePath);
-            pipeProducer = Task.Run(
-                () => ProduceCommandsAsync(pipeSource, channel.Writer, token),
-                token);
-
-            _logger.Info($"Pipe input enabled: {_config.PipePath}");
-        }
-
-        return (channel, consoleProducer, pipeProducer);
-    }
-
-    private async Task ProduceCommandsAsync(
-        ICommandSource source,
-        ChannelWriter<char> writer,
-        CancellationToken token)
-    {
-        try
-        {
-            await foreach (var cmd in source.ReadCommandsAsync(token))
-            {
-                if (!writer.TryWrite(cmd))
-                    break;
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // normal
-        }
-        catch (Exception ex)
-        {
-            _logger.Warn($"Command source error: {ex.Message}");
-        }
-    }
 
     private async Task ProcessCommandsAsync(
         ChannelReader<char> reader,
@@ -152,11 +104,11 @@ public sealed class PvWhisperApp
                         break;
                     case 'v':
                         await HandleStartCaptureAsync();
-                        _ = timeoutManager.ArmAsync();
+                        _ = timeoutManager.RestartTimeoutAsync();
                         break;
                     case 'c':
                         await HandleStartCaptureAsync();
-                        _ = timeoutManager.ArmAsync();
+                        _ = timeoutManager.RestartTimeoutAsync();
                         break;
                     case 'z':
                         timeoutManager.Cancel();
@@ -228,9 +180,7 @@ public sealed class PvWhisperApp
         try
         {
             var text = await _transcriber.TranscribeAsync(samples, token);
-            var transformed = _textTransformer.Transform(text);
-
-            await _outputDispatcher.DispatchAsync(transformed, token);
+            await _outputDispatcher.DispatchAsync(text, token);
         }
         catch (OperationCanceledException)
         {
