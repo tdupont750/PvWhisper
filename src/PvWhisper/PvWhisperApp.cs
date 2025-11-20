@@ -51,8 +51,17 @@ public sealed class PvWhisperApp
         await consoleProducer;
         
         // Ensure pipe producer finishes (non-blocking source)
-        if (pipeProducer != null)
-            await pipeProducer;
+        if (pipeProducer is { IsCompleted: false })
+        {
+            // Pipe producer may be deadlocked trying to read an empty pipe,
+            // so wait up to 5 seconds for it to finish
+            var shutdownTask = Task.Delay(TimeSpan.FromSeconds(2));
+            await Task.WhenAny(shutdownTask, pipeProducer);
+            if (!pipeProducer.IsCompleted)
+            {
+                _logger.Warn("Pipe producer did not shut down in time; ignoring and continuing with shutdown.");
+            }
+        }
 
         return 0;
     }
@@ -155,6 +164,9 @@ public sealed class PvWhisperApp
                     case 'x':
                         timeoutManager.Cancel();
                         await HandleStopAndTranscribeAsync(appCts.Token);
+                        break;
+                    case 'i':
+                        _logger.Info("Pipe inintialized.");
                         break;
                     default:
                         _logger.Warn($"Unknown command: '{cmd}'");
