@@ -9,27 +9,21 @@ namespace PvWhisper.Audio;
 /// </summary>
 public sealed class CaptureTimeoutManager : IDisposable
 {
-    private readonly Func<bool> _isCapturing;
-    private readonly Func<CancellationToken, Task> _onTimeoutAsync;
+    private readonly Func<Task> _onTimeoutAsync;
     private readonly CancellationToken _appToken;
     private readonly Lock _lock = new();
 
     private readonly int _timeoutSeconds;
     private CancellationTokenSource? _cts;
-    private readonly ILogger _logger;
 
     public CaptureTimeoutManager(
         int timeoutSeconds,
         CancellationToken appToken,
-        Func<bool> isCapturing,
-        Func<CancellationToken, Task> onTimeoutAsync,
-        ILogger? logger = null)
+        Func<Task> onTimeoutAsync)
     {
         _timeoutSeconds = timeoutSeconds;
         _appToken = appToken;
-        _isCapturing = isCapturing;
         _onTimeoutAsync = onTimeoutAsync;
-        _logger = logger;
     }
 
     /// <summary>
@@ -60,10 +54,9 @@ public sealed class CaptureTimeoutManager : IDisposable
         {
             await Task.Delay(TimeSpan.FromSeconds(_timeoutSeconds), localCts.Token);
 
-            if (!localCts.IsCancellationRequested && _isCapturing())
+            if (!localCts.IsCancellationRequested)
             {
-                _logger.Warn($"Auto-stopping capture after {_timeoutSeconds} seconds...");
-                await _onTimeoutAsync(_appToken);
+                await _onTimeoutAsync();
             }
         }
         catch (OperationCanceledException)

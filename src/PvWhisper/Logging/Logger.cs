@@ -33,6 +33,24 @@ public sealed class Logger : ILogger
         WriteLine(true, ex.ToString(), ConsoleColor.DarkRed);
     }
 
+    public void ToggleAlert(string alertText, bool isShow)
+    {
+        if (isShow)
+        {
+            var prevColor = Console.BackgroundColor;
+            Console.BackgroundColor = ConsoleColor.Red;
+            Console.Write(alertText);
+            Console.BackgroundColor = prevColor;
+        }
+        else
+        {
+            var cursorPosition = Console.GetCursorPosition();
+            Console.SetCursorPosition(0, cursorPosition.Top);
+            Console.Write(new string(' ', alertText.Length));
+            Console.SetCursorPosition(0, cursorPosition.Top);
+        }
+    }
+
     private static void WriteInfo(string level, string message, bool isError, ConsoleColor color)
     {
         // Avoid double-tagging if the message already starts with [LEVEL]

@@ -66,7 +66,6 @@ public sealed class PvWhisperApp
         return 0;
     }
 
-
     private async Task ProcessCommandsAsync(
         ChannelReader<char> reader,
         CancellationTokenSource appCts)
@@ -75,15 +74,20 @@ public sealed class PvWhisperApp
         using var timeoutManager = new CaptureTimeoutManager(
             _config.CaptureTimeoutSeconds,
             appCts.Token,
-            () => _captureManager.IsCapturing,
-            HandleStopAndTranscribeAsync,
-            _logger);
+            async () =>
+            {
+                if (_captureManager.IsCapturing)
+                {
+                    _logger.Warn($"Auto-stopping capture after {_config.CaptureTimeoutSeconds} seconds...");
+                    await HandleStopAndTranscribeAsync(appCts.Token);
+                }
+            });
 
         while (await reader.WaitToReadAsync(appCts.Token))
         {
             while (reader.TryRead(out var raw))
             {
-                TryToggleCaptureStatusIndicator(true);
+                TryToggleCaptureStatusIndicator(false);
                 
                 var cmd = char.ToLowerInvariant(raw);
 
@@ -127,7 +131,7 @@ public sealed class PvWhisperApp
                         break;
                 }
                 
-                TryToggleCaptureStatusIndicator(false);
+                TryToggleCaptureStatusIndicator(true);
             }
         }
     }
@@ -144,26 +148,10 @@ public sealed class PvWhisperApp
         await _captureManager.StartCaptureAsync();
     }
 
-    private void TryToggleCaptureStatusIndicator(bool clear)
+    private void TryToggleCaptureStatusIndicator(bool isShow)
     {
-        if (!_captureManager.IsCapturing) return;
-        
-        const string captureStatusLine = "--- CAPTURING ---";
-
-        if (clear)
-        {
-            var cursorPosition = Console.GetCursorPosition();
-            Console.SetCursorPosition(0, cursorPosition.Top);
-            Console.Write(new string(' ', captureStatusLine.Length));
-            Console.SetCursorPosition(0, cursorPosition.Top);
-        }
-        else
-        {
-            var prevColor = Console.BackgroundColor;
-            Console.BackgroundColor = ConsoleColor.Red;
-            Console.Write(captureStatusLine);
-            Console.BackgroundColor = prevColor;
-        }
+        if (_captureManager.IsCapturing)
+            _logger.ToggleAlert("--- CAPTURING ---", isShow);
     }
     
     private async Task HandleStopAndTranscribeAsync(CancellationToken token)

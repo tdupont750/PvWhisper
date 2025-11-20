@@ -8,4 +8,5 @@ public interface ILogger
     void Warn(string message);
     void Error(string message);
     void Error(Exception ex);
+    void ToggleAlert(string alertText, bool isShow);
 }

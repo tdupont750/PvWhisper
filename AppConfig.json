@@ -25,10 +25,10 @@
     "isRegex": true
   }, {
     "description": "Remove whisper noise messages",
-    "find": "\\b[\\W+]\\b",
+    "find": "\\b[(\\w|_)+]\\b",
     "replace": "",
     "caseSensitive": false,
-    "isRegex": false
+    "isRegex": true
   }],
   "outputs": ["Console", "ydotool"]
 }

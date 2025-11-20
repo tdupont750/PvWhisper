@@ -1,4 +1,4 @@
-namespace PvWhisper.Input;
+namespace PvWhisper.Input.Sources;
 
 public interface ICommandSource
 {
