@@ -39,7 +39,7 @@ public sealed class PvWhisperApp
     }
 
     public async Task<int> RunAsync(CancellationTokenSource appCts)
-    {
+    {   
         var (channel, consoleProducer, pipeProducer) = CreateChannelAndStartProducers(appCts.Token);
 
         await ProcessCommandsAsync(channel.Reader, appCts);
@@ -131,6 +131,8 @@ public sealed class PvWhisperApp
         {
             while (reader.TryRead(out var raw))
             {
+                TryToggleCaptureStatusIndicator(true);
+                
                 var cmd = char.ToLowerInvariant(raw);
 
                 if (cmd == 'q')
@@ -172,6 +174,8 @@ public sealed class PvWhisperApp
                         _logger.Warn($"Unknown command: '{cmd}'");
                         break;
                 }
+                
+                TryToggleCaptureStatusIndicator(false);
             }
         }
     }
@@ -188,8 +192,30 @@ public sealed class PvWhisperApp
         await _captureManager.StartCaptureAsync();
     }
 
-    private async Task HandleStopAndTranscribeAsync(CancellationToken token)
+    private void TryToggleCaptureStatusIndicator(bool clear)
     {
+        if (!_captureManager.IsCapturing) return;
+        
+        const string captureStatusLine = "--- CAPTURING ---";
+
+        if (clear)
+        {
+            var cursorPosition = Console.GetCursorPosition();
+            Console.SetCursorPosition(0, cursorPosition.Top);
+            Console.Write(new string(' ', captureStatusLine.Length));
+            Console.SetCursorPosition(0, cursorPosition.Top);
+        }
+        else
+        {
+            var prevColor = Console.BackgroundColor;
+            Console.BackgroundColor = ConsoleColor.Red;
+            Console.Write(captureStatusLine);
+            Console.BackgroundColor = prevColor;
+        }
+    }
+    
+    private async Task HandleStopAndTranscribeAsync(CancellationToken token)
+    {   
         _logger.Info("Stopping capture and transcribing...");
         var samples = await _captureManager.StopCaptureAndGetSamplesAsync();
 

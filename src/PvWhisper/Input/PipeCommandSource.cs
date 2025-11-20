@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace PvWhisper.Input;
 
@@ -12,7 +11,6 @@ public sealed class PipeCommandSource : ICommandSource
         _path = path ?? throw new ArgumentNullException(nameof(path));
     }
 
-    
     public async IAsyncEnumerable<char> ReadCommandsAsync([EnumeratorCancellation] CancellationToken token)
     {
         await using var fs = new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
