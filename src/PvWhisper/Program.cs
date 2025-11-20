@@ -31,7 +31,7 @@ internal static class Program
             return 1;
         }
 
-        PrintStartupInfo(logger);
+        PrintStartupInfo(config, logger);
 
         using var appCts = new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) =>
@@ -101,15 +101,22 @@ internal static class Program
         return 0;
     }
 
-    private static void PrintStartupInfo(ILogger logger)
+    private static void PrintStartupInfo(AppConfig appConfig, ILogger logger)
     {
-        logger.Info("PvWhisper – PvRecorder + Whisper.net");
+        logger.Info("PvWhisper – A cross platform Speech to Text program");
+        
         logger.Debug("Commands:");
         logger.Debug("  v = toggle capture (start / stop + transcribe)");
         logger.Debug("  c = start capture");
         logger.Debug("  z = stop capture and discard audio");
         logger.Debug("  x = stop capture and transcribe");
         logger.Debug("  q = quit");
+        
+        if (!appConfig.HasPipeSource) return;
+        
+        logger.Debug("In another terminal, you can send commands:");
+        logger.Debug("  echo -n 'v' > '$PIPE_PATH'   # toggle capture");
+        logger.Debug("  echo -n 'q' > '$PIPE_PATH'   # quit");
     }
 
     private static void LogAvailableDevices(int deviceIndex, ILogger logger)

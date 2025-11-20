@@ -29,9 +29,9 @@ public sealed class CommandChannelFactory : ICommandChannelFactory
 
         // Optional pipe input (simultaneous)
         Task? pipeProducer = null;
-        if (_config.PipePath != null)
+        if (_config.HasPipeSource)
         {
-            var pipeSource = new PipeCommandSource(_config.PipePath);
+            var pipeSource = new PipeCommandSource(_config.PipePath!);
             pipeProducer = Task.Run(
                 () => ProduceCommandsAsync(pipeSource, channel.Writer, token),
                 token);

@@ -27,22 +27,17 @@ INFO "Using project:    $PROJECT_PATH"
 
 # Create the named pipe if it doesn't exist
 if [[ -e "$PIPE_PATH" && ! -p "$PIPE_PATH" ]]; then
-  ERROR "'$PIPE_PATH' exists but is not a named pipe."
-  WARN "Deleting '$PIPE_PATH'."
+  ERROR "'$PIPE_PATH' exists but is not a named pipe"
+  WARN "Deleting '$PIPE_PATH'"
   rm -fr "$PIPE_PATH"
 fi
 
 if [[ ! -p "$PIPE_PATH" ]]; then
-  INFO "Creating named pipe."
+  INFO "Creating named pipe '$PIPE_PATH'"
   mkfifo "$PIPE_PATH"
 else
-  WARN "Named pipe already exists."
+  WARN "Named pipe already exists '$PIPE_PATH'"
 fi
-
-# Optional: show how to send commands to it
-DEBUG "In another terminal, you can send commands like:"
-DEBUG "  echo -n 'v' > '$PIPE_PATH'   # toggle capture"
-DEBUG "  echo -n 'q' > '$PIPE_PATH'   # quit"
 
 # Initalize so dotnet StreamReader can open the file
 INFO "Initalizing '$PIPE_PATH'"
@@ -70,5 +65,5 @@ else
   ERROR "Could not find '$PIPE_PATH'"
 fi
 
-INFO "Done."
+INFO "Done"
 exit "$EXIT_CODE"

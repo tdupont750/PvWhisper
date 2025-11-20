@@ -5,6 +5,8 @@ namespace PvWhisper.Config;
 // Acts as the single DTO for both defaults deserialization and the final configuration
 public sealed class AppConfig
 {
+    public bool HasPipeSource => !string.IsNullOrWhiteSpace(PipePath);
+    
     public int? DeviceIndex { get; set; }
     public string? PipePath { get; set; }
 
