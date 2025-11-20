@@ -101,12 +101,12 @@ internal static class Program
     private static void PrintStartupInfo(ILogger logger)
     {
         logger.Info("PvWhisper – PvRecorder + Whisper.net");
-        logger.Info("Commands:");
-        logger.Info("  v = toggle capture (start / stop + transcribe)");
-        logger.Info("  c = start capture");
-        logger.Info("  z = stop capture and discard audio");
-        logger.Info("  x = stop capture and transcribe");
-        logger.Info("  q = quit");
+        logger.Debug("Commands:");
+        logger.Debug("  v = toggle capture (start / stop + transcribe)");
+        logger.Debug("  c = start capture");
+        logger.Debug("  z = stop capture and discard audio");
+        logger.Debug("  x = stop capture and transcribe");
+        logger.Debug("  q = quit");
     }
 
     private static void LogAvailableDevices(int deviceIndex, ILogger logger)
