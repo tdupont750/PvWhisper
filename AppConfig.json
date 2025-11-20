@@ -25,7 +25,7 @@
     "isRegex": true
   }, {
     "description": "Remove whisper noise messages",
-    "find": "\\b[(\\w|_)+]\\b",
+    "find": "\\[(\\w|_)+\\]",
     "replace": "",
     "caseSensitive": false,
     "isRegex": true
