@@ -56,7 +56,7 @@ public sealed class Logger : ILogger
         // Avoid double-tagging if the message already starts with [LEVEL]
         if (!message.StartsWith("[" + level + "]", StringComparison.OrdinalIgnoreCase))
         {
-            message = $"[{level}] {message}";
+            message = $"[APP] [{level}] {message}";
         }
         WriteLine(isError, message, color);
     }
