@@ -37,7 +37,7 @@ public sealed class ModelEnsurer
 
         if (File.Exists(fullPath))
         {
-            _logger.Info($"Using existing model: {fullPath}");
+            _logger.Debug($"Using existing model: {fullPath}");
             return fullPath;
         }
 

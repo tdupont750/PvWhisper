@@ -35,8 +35,6 @@ public sealed class CommandChannelFactory : ICommandChannelFactory
             pipeProducer = Task.Run(
                 () => ProduceCommandsAsync(pipeSource, channel.Writer, token),
                 token);
-
-            _logger.Info($"Pipe input enabled: {_config.PipePath}");
         }
 
         return (channel, consoleProducer, pipeProducer);

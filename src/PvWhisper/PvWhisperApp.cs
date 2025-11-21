@@ -93,7 +93,7 @@ public sealed class PvWhisperApp
 
                 if (cmd == 'q')
                 {
-                    _logger.Info("Stopping...");
+                    _logger.Debug("Stopping...");
                     timeoutManager.Cancel();
                     await _captureManager.StopCaptureAndDiscardAsync();
                     await appCts.CancelAsync();
@@ -124,10 +124,10 @@ public sealed class PvWhisperApp
                         await HandleStopAndTranscribeAsync(appCts.Token);
                         break;
                     case 'i':
-                        _logger.Info("Pipe inintialized.");
+                        _logger.Debug($"Reader - Successfully initialized pipe '{_config.PipePath}'");
                         break;
                     default:
-                        _logger.Warn($"Unknown command: '{cmd}'");
+                        _logger.Error($"Unknown command: '{cmd}'");
                         break;
                 }
                 

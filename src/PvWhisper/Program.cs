@@ -83,7 +83,7 @@ internal static class Program
                 logger);
 
             var exitCode = await app.RunAsync(appCts);
-            logger.Info("PvWhisper stopped.");
+            logger.Debug("PvWhisper stopped.");
             return exitCode;
         }
         catch (OperationCanceledException)
@@ -97,13 +97,13 @@ internal static class Program
             return 1;
         }
 
-        logger.Info("PvWhisper stopped.");
+        logger.Debug("PvWhisper stopped.");
         return 0;
     }
 
     private static void PrintStartupInfo(AppConfig appConfig, ILogger logger)
     {
-        logger.Info("PvWhisper – A cross platform Speech to Text program");
+        logger.Debug("PvWhisper – A cross platform Speech to Text program");
         
         logger.Debug("Commands:");
         logger.Debug("  v = toggle capture (start / stop + transcribe)");
@@ -130,7 +130,7 @@ internal static class Program
         var selectedDeviceName = (deviceIndex >= 0 && deviceIndex < devices.Length)
             ? devices[deviceIndex]
             : "System default";
-        logger.Info($"Using device index {deviceIndex} -> {selectedDeviceName}");
+        logger.Debug($"Using device index {deviceIndex} -> {selectedDeviceName}");
     }
     
 }
