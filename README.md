@@ -12,27 +12,27 @@ Authored using AI via [JetBrains Junie](https://www.jetbrains.com/junie/)
 
 ## Features
 
-1. **Write to Console**
+- **Write to Console**
 	- Prints transcribed Speech to Text out to the console
 	- Works on Linux, Mac, and Windows
 
-2. **Write to Clipboard**
+- **Write to Clipboard**
 	- Copy transcribed Speech to Text to the system clipboard
 	- Works on Linux, Mac, and Windows
 
-3. **Write to Virtual Keyboard (ydotool)**
+- **Write to Virtual Keyboard (ydotool)**
 	- Type transcribed Speech to Text into a virtual keyboard
 	- Only available on Linux with [ydotool](https://github.com/ReimuNotMoe/ydotool)  
 
-4. **Use any Whisper Model**
+- **Use any Whisper Model**
 	- Multiple [Whisper Model](https://whisper-api.com/blog/models/) sizes supported
 	- Automatically downloads models from [Hugging Face](https://huggingface.co/openai/models)
 
-5. **Toggle speech capture via named pipe**
+- **Toggle speech capture via named pipe**
 	- Create global shortcut to toggle speech capture via shell script
 	- Works on Linux, Mac, and Windows with [WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
 
-6. **Text transformations with Regular Expressions**
+- **Text transformations with Regular Expressions**
 	- Create any number of transform rules
 	- Use plain text or regular expressions
 
@@ -71,4 +71,6 @@ In another terminal, you can send commands:
 - `echo -n 'v' > '$PIPE_PATH'   # toggle capture`
 - `echo -n 'q' > '$PIPE_PATH'   # quit`
 
-*Release under the GNU General Public License v3.0*
+## License
+
+Release under the GNU General Public License v3.0
