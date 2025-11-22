@@ -74,6 +74,8 @@ In another terminal, you can send commands:
 
 Released under the GNU General Public License v3.0.
 
+---
+
 # Adventures in Vibe Coding
 
 This section is the story of why I built this tool, how I built this tool, and the lessons I learned while building it.
