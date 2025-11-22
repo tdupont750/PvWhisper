@@ -16,7 +16,7 @@ public sealed class ConsoleCommandSource : ICommandSource
             }
             else
             {
-                await Task.Delay(10, token);
+                await Task.Delay(50, token);
             }
         }
     }
