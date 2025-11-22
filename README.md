@@ -140,7 +140,7 @@ AI can understand the immediate task. It can statistically extrapolate the next 
 
 Because of this, AI is not good at thinking about the big picture or architecture. A large language model can only hold so much context in memory at once; this is something where the human brain still does have quite an advantage over our GPU counterparts! While AI is phenomenal at understanding one method or one class, it is not going to understand the whole project, let alone an entire solution.
 
-### What AI coding agents are good at
+## What AI coding agents are good at
 
 It may sound like a short list, but it’s really not:
 
@@ -154,23 +154,23 @@ An AI coding agent is like an engineer with encyclopedic knowledge of the tech s
 
 Okay, now for the downsides.
 
-### What AI coding agents are bad at
+## What AI coding agents are bad at
 
 Let’s get the hyperbolic sentence out of the way: AI agents are savant sociopaths who will lie to your face and even argue with you in order to try to make you happy.
 
 From here, I’ll use concrete examples from this project to discuss the shortcomings of AI coding agents.
 
-#### Occasionally it just lies (hallucinates)
+### Occasionally it just lies (hallucinates)
 
 At the start of the project, I asked ChatGPT to pick libraries. It wisely recommended Whisper.net and TextCopy (which I already planned to use). Originally, it recommended [NAudio](https://github.com/naudio/NAudio) for audio. While NAudio is cross-platform, it does **not** support microphone input on Linux, despite the explicit requirement for cross-platform audio input.
 
-#### Everything is treated as a one-off script
+### Everything is treated as a one-off script
 
 At the start, I told ChatGPT I wanted to work on a new project, so it generated shell scripts that literally created a new .NET project and added dependencies. Nice for beginners, not useful for maintaining a real project.
 
 When adding Whisper.net dependencies, it didn’t include `Whisper.net.Runtime`, so although the project compiled, it wouldn’t run.
 
-#### Monolithic methods and classes
+### Monolithic methods and classes
 
 The AI’s only real objective is to complete the immediate task, so it treats everything like a script and produces monstrous methods.
 
@@ -183,35 +183,35 @@ The AI’s only real objective is to complete the immediate task, so it treats e
 
 I had to repeatedly stop and explicitly instruct the AI to refactor and break functionality out into different methods and classes.
 
-#### Statics everywhere
+### Statics everywhere
 
 After initial refactors, everything was still static. I had to explicitly instruct it to remove statics, create interfaces, and use constructor injection.
 
-#### Design patterns
+### Design patterns
 
 AI almost never uses design patterns unless explicitly told to. Everything defaults to giant methods full of nested loops and conditionals.
 
 The `CommandSources` and `OutputDispatchers` were originally in the same class. Even when asked to break them apart, it didn’t create a factory; it just instantiated everything inline.
 
-#### Testability
+### Testability
 
 AI is shockingly good at authoring unit tests with edge cases; but only when the code itself is testable.
 
 Ironically, it’s terrible at writing testable code unless explicitly instructed to. For example, I had to tell it to move the RegEx replacement functionality into its own testable class.
 
-#### Large refactors
+### Large refactors
 
 It’s good at refactoring a single method or class, but struggles across classes. When dealing with lambdas and closures, it frequently adds unnecessary pass-throughs or wrappers.
 
 It often won’t delete dead code unless explicitly told to. It also leaves behind old methods with comments about “backwards compatibility,” and doesn’t mark them obsolete. (This definitely implies that it's being trained on SDKs which intentionally leave legacy methods behind.) 
 
-#### Does not intuit SDK edge cases
+### Does not intuit SDK edge cases
 
 The .NET Console library is a notoriously weak part of the framework. Particularly problematic is that many read calls block even when marked async. The AI trusts the documentation too literally and doesn’t anticipate blocking.
 
 This caused:
 
-#### Only solving the first problem
+### Only solving the first problem
 
 Reading from a named pipe blocks until something arrives. If no input is ever received, then this will cause a deadlock when shutting down.
 
@@ -220,7 +220,7 @@ The AIs second: open the pipe as read/write, which fixed the first block but the
 The AIs third: fall back to the timeout again.  
 The AIs fourth: generate OS-specific native code via extern methods; surprisingly effective, but not desirable.
 
-#### Repeats the same mistakes
+### Repeats the same mistakes
 
 I had a much simpler solution in mind: write something into the pipe at creation time so .NET has something to read.
 
@@ -228,7 +228,7 @@ When asked to update my shell script, it immediately wrote to the pipe, which th
 
 Only after instructing it to add a timeout to the shell scripts write did it finally work.
 
-### Key takeaways
+## Key takeaways
 
 You may have noticed a recurring word:
 
@@ -254,4 +254,4 @@ You must *constantly* force refactoring:
 
 **The Ugly:** I am genuinely terrified about how many monolithic, unsustainable codebases are going to be filled with AI-generated slop.
 
-But, like all things, practice will make perfect... so start practicing!
+But, like all things, practice will make perfect; *so start practicing!*
