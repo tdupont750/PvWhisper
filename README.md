@@ -39,11 +39,10 @@ Authored using AI via [JetBrains Junie](https://www.jetbrains.com/junie/)
 ## Getting Started
 
 1. Install the [dotnet SDK](https://dotnet.microsoft.com/en-us/download)
-2. Install [git](https://git-scm.com/)
-3. Clone this repository
-4. Configure via `AppConfig.json` 
-5. Execute `run_pvw.sh` 
-6. Toggle capture by executing `toggle_pvw.sh`
+2. Clone this repository
+3. Configure via `AppConfig.json` 
+4. Execute `run_pvw.sh` 
+5. Toggle capture by executing `toggle_pvw.sh`
 
 ## Configuration
 
