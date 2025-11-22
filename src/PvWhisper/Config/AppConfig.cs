@@ -17,6 +17,10 @@ public sealed class AppConfig
     // Directory where model files are stored/loaded
     public string? ModelDir { get; set; }
 
+    // Number of threads to use by Whisper for processing
+    // Default is 8
+    public int WhisperThreads { get; set; } = 8;
+
     // Ordered text transforms applied to transcribed text
     public List<TextTransformConfig>? TextTransforms { get; set; }
 

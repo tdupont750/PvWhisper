@@ -4,6 +4,7 @@
   "language": "en",
   "modelType": "Base",
   "modelDir": "~/WhisperModels",
+  "whisperThreads": 8,
   "captureTimeoutSeconds": 60,
   "textTransforms": [{
     "description": "Capitalize first letter",

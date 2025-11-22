@@ -57,7 +57,7 @@ internal static class Program
             await using var processor = whisperFactory
                 .CreateBuilder()
                 .WithLanguage(config.Language)
-                .WithThreads(8)
+                .WithThreads(config.WhisperThreads)
                 .Build();
 
             var wavHelper = new WavConverter();
