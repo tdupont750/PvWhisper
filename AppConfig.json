@@ -1,11 +1,12 @@
 {
-  "deviceIndex": -1,
-  "pipePath": "/tmp/pvwhisper.fifo",
-  "language": "en",
-  "modelType": "Base",
-  "modelDir": "~/WhisperModels",
-  "whisperThreads": 8,
+  "outputs": ["Console", "ydotool"],
   "captureTimeoutSeconds": 60,
+  "deviceIndex": -1,
+  "language": "en",
+  "modelDir": "~/WhisperModels",
+  "modelType": "Base",
+  "pipePath": "/tmp/pvwhisper.fifo",
+  "whisperThreads": 8,
   "textTransforms": [{
     "description": "Capitalize first letter",
     "find": "^(\\w)",
@@ -30,6 +31,5 @@
     "replace": "",
     "caseSensitive": false,
     "isRegex": true
-  }],
-  "outputs": ["Console", "ydotool"]
+  }]
 }

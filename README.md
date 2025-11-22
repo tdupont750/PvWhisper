@@ -56,7 +56,7 @@ Supported Outputs:
 
 See source for [OutputTargets](https://github.com/tdupont750/PvWhisper/blob/main/src/PvWhisper/Config/OutputTarget.cs) and [ModelKinds](https://github.com/tdupont750/PvWhisper/blob/main/src/PvWhisper/Config/ModelKind.cs)
 
-Text transformations will run in order provided
+Text transformations will run in the order provided
 
 ## Commands
 
