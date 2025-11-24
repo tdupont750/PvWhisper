@@ -78,8 +78,9 @@ public sealed class PvWhisperApp
             {
                 if (_captureManager.IsCapturing)
                 {
+                    TryToggleCaptureStatusIndicator(false);
                     _logger.Warn($"Auto-stopping capture after {_config.CaptureTimeoutSeconds} seconds...");
-                    await HandleStopAndTranscribeAsync(appCts.Token);
+                    await HandleStopAndTranscribeAsync(appCts.Token, true);
                 }
             });
 
@@ -154,12 +155,12 @@ public sealed class PvWhisperApp
             _logger.ToggleAlert("--- CAPTURING ---", isShow);
     }
     
-    private async Task HandleStopAndTranscribeAsync(CancellationToken token)
+    private async Task HandleStopAndTranscribeAsync(CancellationToken token, bool discardTranscribe = false)
     {   
         _logger.Info("Stopping capture and transcribing...");
         var samples = await _captureManager.StopCaptureAndGetSamplesAsync();
 
-        if (samples == null || samples.Length == 0)
+        if (discardTranscribe || samples == null || samples.Length == 0)
         {
             _logger.Info("No audio captured to transcribe.");
             return;
