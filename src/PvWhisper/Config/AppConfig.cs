@@ -8,6 +8,7 @@ public sealed class AppConfig
     public bool HasPipeSource => !string.IsNullOrWhiteSpace(PipePath);
     
     public int? DeviceIndex { get; set; }
+    public string? DeviceName { get; set; }
     public string? PipePath { get; set; }
 
     public string Language { get; set; } = "en";

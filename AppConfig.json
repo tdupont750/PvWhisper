@@ -2,6 +2,7 @@
   "outputs": ["Console", "ydotool"],
   "captureTimeoutSeconds": 60,
   "deviceIndex": -1,
+  "deviceName": "",
   "language": "en",
   "modelDir": "~/WhisperModels",
   "modelType": "Base",

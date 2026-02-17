@@ -66,7 +66,7 @@ internal static class Program
             var transcriber = new WhisperTranscriber(processor, textTransformer, wavHelper);
             var outputDispatcher = new OutputDispatcher(config.Outputs, logger);
 
-            var deviceIndex = config.DeviceIndex ?? -1;
+            var deviceIndex = ResolveDeviceIndex(config, logger);
 
             LogAvailableDevices(deviceIndex, logger);
 
@@ -117,6 +117,28 @@ internal static class Program
         logger.Debug("In another terminal, you can send commands:");
         logger.Debug("  echo -n 'v' > '$PIPE_PATH'   # toggle capture");
         logger.Debug("  echo -n 'q' > '$PIPE_PATH'   # quit");
+    }
+
+    private static int ResolveDeviceIndex(AppConfig config, ILogger logger)
+    {
+        var devices = PvRecorder.GetAvailableDevices();
+        var deviceIndex = config.DeviceIndex ?? -1;
+
+        if (!string.IsNullOrWhiteSpace(config.DeviceName))
+        {
+            for (var i = 0; i < devices.Length; i++)
+            {
+                if (devices[i].Contains(config.DeviceName, StringComparison.OrdinalIgnoreCase))
+                {
+                    logger.Info($"Device with name '{config.DeviceName}' found at index {i}.");
+                    return i;
+                }
+            }
+            
+            logger.Warn($"Device with name '{config.DeviceName}' NOT found, falling back to index {deviceIndex}.");
+        }
+
+        return deviceIndex;
     }
 
     private static void LogAvailableDevices(int deviceIndex, ILogger logger)
