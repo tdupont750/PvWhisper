@@ -6,7 +6,7 @@ namespace PvWhisper.Audio;
 public sealed class CaptureManager : ICaptureManager
 {
     private PvRecorder? _recorder;
-    private readonly int _deviceIndex;
+    private readonly Func<int> _deviceIndexResolver;
     private readonly int _frameLength;
     private readonly ILogger _logger;
     private readonly Lock _lock = new();
@@ -17,9 +17,9 @@ public sealed class CaptureManager : ICaptureManager
 
     public bool IsCapturing { get; private set; }
 
-    public CaptureManager(int deviceIndex, int frameLength, ILogger logger)
+    public CaptureManager(Func<int> deviceIndexResolver, int frameLength, ILogger logger)
     {
-        _deviceIndex = deviceIndex;
+        _deviceIndexResolver = deviceIndexResolver;
         _frameLength = frameLength;
         _logger = logger;
     }
@@ -35,7 +35,7 @@ public sealed class CaptureManager : ICaptureManager
             _captureCts = new CancellationTokenSource();
             IsCapturing = true;
             // Lazily create and start recorder only while actively capturing
-            _recorder = PvRecorder.Create(frameLength: _frameLength, deviceIndex: _deviceIndex);
+            _recorder = PvRecorder.Create(frameLength: _frameLength, deviceIndex: _deviceIndexResolver());
             _recorder.Start();
             _captureTask = Task.Run(() => CaptureLoop(_captureCts.Token), _captureCts.Token);
         }

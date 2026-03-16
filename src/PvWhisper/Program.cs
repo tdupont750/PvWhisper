@@ -1,13 +1,12 @@
 using System.Text;
-using Pv;
 using PvWhisper.Audio;
 using PvWhisper.Config;
+using PvWhisper.Input;
 using PvWhisper.Logging;
 using PvWhisper.Output;
 using PvWhisper.Text;
 using PvWhisper.Transcription;
 using Whisper.net;
-using PvWhisper.Input;
 
 namespace PvWhisper;
 
@@ -42,16 +41,13 @@ internal static class Program
 
         try
         {
-            // Require explicit model directory; do not create or default
             if (string.IsNullOrWhiteSpace(config.ModelDir))
             {
                 logger.Error("Model directory is required. Set 'modelDir' in AppConfig.json.");
                 return 1;
             }
 
-            // Ensure model exists in the provided modelDir based on ModelType
-            var modelEnsurer = new ModelEnsurer(logger);
-            var modelPath = await modelEnsurer.EnsureModelAsync(config.ModelType, config.ModelDir, appCts.Token);
+            var modelPath = await new ModelEnsurer(logger).EnsureModelAsync(config.ModelType, config.ModelDir, appCts.Token);
 
             using var whisperFactory = WhisperFactory.FromPath(modelPath);
             await using var processor = whisperFactory
@@ -60,27 +56,19 @@ internal static class Program
                 .WithThreads(config.WhisperThreads)
                 .Build();
 
-            var wavHelper = new WavConverter();
-            var regexReplacer = new RegexReplacer();
-            var textTransformer = new TextTransformer(config.TextTransforms, regexReplacer);
-            var transcriber = new WhisperTranscriber(processor, textTransformer, wavHelper);
+            var transcriber = new WhisperTranscriber(
+                processor,
+                new TextTransformer(config.TextTransforms, new RegexReplacer()),
+                new WavConverter());
+
+            var deviceResolver = new DeviceResolver(config, logger);
+            deviceResolver.LogAvailable();
+
+            var captureManager = new CaptureManager(deviceResolver.Resolve, frameLength: 512, logger);
             var outputDispatcher = new OutputDispatcher(config.Outputs, logger);
-
-            var deviceIndex = ResolveDeviceIndex(config, logger);
-
-            LogAvailableDevices(deviceIndex, logger);
-
-            var captureManager = new CaptureManager(deviceIndex, frameLength: 512, logger);
-
             var commandChannelFactory = new CommandChannelFactory(config, logger);
 
-            var app = new PvWhisperApp(
-                config,
-                captureManager,
-                transcriber,
-                outputDispatcher,
-                commandChannelFactory,
-                logger);
+            var app = new PvWhisperApp(config, captureManager, transcriber, outputDispatcher, commandChannelFactory, logger);
 
             var exitCode = await app.RunAsync(appCts);
             logger.Debug("PvWhisper stopped.");
@@ -104,55 +92,18 @@ internal static class Program
     private static void PrintStartupInfo(AppConfig appConfig, ILogger logger)
     {
         logger.Debug("PvWhisper – A cross platform Speech to Text program");
-        
+
         logger.Debug("Commands:");
         logger.Debug("  v = toggle capture (start / stop + transcribe)");
         logger.Debug("  c = start capture");
         logger.Debug("  z = stop capture and discard audio");
         logger.Debug("  x = stop capture and transcribe");
         logger.Debug("  q = quit");
-        
+
         if (!appConfig.HasPipeSource) return;
-        
+
         logger.Debug("In another terminal, you can send commands:");
         logger.Debug("  echo -n 'v' > '$PIPE_PATH'   # toggle capture");
         logger.Debug("  echo -n 'q' > '$PIPE_PATH'   # quit");
     }
-
-    private static int ResolveDeviceIndex(AppConfig config, ILogger logger)
-    {
-        var devices = PvRecorder.GetAvailableDevices();
-        var deviceIndex = config.DeviceIndex ?? -1;
-
-        if (!string.IsNullOrWhiteSpace(config.DeviceName))
-        {
-            for (var i = 0; i < devices.Length; i++)
-            {
-                if (devices[i].Contains(config.DeviceName, StringComparison.OrdinalIgnoreCase))
-                {
-                    logger.Info($"Device with name '{config.DeviceName}' found at index {i}.");
-                    return i;
-                }
-            }
-            
-            logger.Warn($"Device with name '{config.DeviceName}' NOT found, falling back to index {deviceIndex}.");
-        }
-
-        return deviceIndex;
-    }
-
-    private static void LogAvailableDevices(int deviceIndex, ILogger logger)
-    {
-        logger.Debug("Available input devices:");
-        var devices = PvRecorder.GetAvailableDevices();
-        for (var i = 0; i < devices.Length; i++)
-        {
-            logger.Debug($"  [{i}] {devices[i]}");
-        }
-        var selectedDeviceName = (deviceIndex >= 0 && deviceIndex < devices.Length)
-            ? devices[deviceIndex]
-            : "System default";
-        logger.Debug($"Using device index {deviceIndex} -> {selectedDeviceName}");
-    }
-    
 }
