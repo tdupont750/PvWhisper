@@ -45,15 +45,19 @@ public sealed class DeviceResolver
             {
                 if (devices[i].Contains(_config.DeviceName, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (_lastIndex == null || i != _lastIndex)
+                    if (_lastIndex == null)
                         _logger.Info($"Device with name '{_config.DeviceName}' found at index {i}.");
+                    else if (i != _lastIndex)
+                        _logger.Warn($"Device with name '{_config.DeviceName}' index changed from {_lastIndex} to {i}.");
                     _lastIndex = i;
                     return i;
                 }
             }
 
-            if (_lastIndex == null || fallback != _lastIndex)
+            if (_lastIndex == null)
                 _logger.Warn($"Device with name '{_config.DeviceName}' NOT found, falling back to index {fallback}.");
+            else if (fallback != _lastIndex)
+                _logger.Warn($"Device with name '{_config.DeviceName}' no longer found; index changed from {_lastIndex} to fallback {fallback}.");
         }
 
         _lastIndex = fallback;
