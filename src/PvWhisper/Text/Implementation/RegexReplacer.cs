@@ -1,7 +1,8 @@
-using System.Text.RegularExpressions;
 using System.Globalization;
+using System.Text.RegularExpressions;
+using PvWhisper.Text;
 
-namespace PvWhisper.Text;
+namespace PvWhisper.Text.Implementation;
 
 public sealed class RegexReplacer : IRegexReplacer
 {

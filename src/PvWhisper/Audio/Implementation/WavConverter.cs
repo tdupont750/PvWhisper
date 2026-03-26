@@ -1,6 +1,7 @@
 using System.Text;
+using PvWhisper.Audio;
 
-namespace PvWhisper.Audio;
+namespace PvWhisper.Audio.Implementation;
 
 public sealed class WavConverter : IWavConverter
 {

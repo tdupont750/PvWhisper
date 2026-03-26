@@ -1,4 +1,6 @@
-namespace PvWhisper.Output.Publishers;
+using PvWhisper.Output.Publishers;
+
+namespace PvWhisper.Output.Publishers.Implementation;
 
 public sealed class ConsoleOutputPublisher : IOutputPublisher
 {

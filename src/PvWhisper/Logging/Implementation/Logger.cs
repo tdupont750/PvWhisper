@@ -1,4 +1,6 @@
-namespace PvWhisper.Logging;
+using PvWhisper.Logging;
+
+namespace PvWhisper.Logging.Implementation;
 
 /// <summary>
 /// Console logger implementation.
@@ -65,12 +67,12 @@ public sealed class Logger : ILogger
     {
         var originalColor = Console.ForegroundColor;
         Console.ForegroundColor = color;
-        
+
         if (isError)
             Console.Error.WriteLine(message);
         else
             Console.WriteLine(message);
-        
+
         Console.ForegroundColor = originalColor;
     }
 }

@@ -1,7 +1,9 @@
 using PvWhisper.Config;
+using PvWhisper.Output;
 using PvWhisper.Output.Publishers;
+using PvWhisper.Output.Publishers.Implementation;
 
-namespace PvWhisper.Output;
+namespace PvWhisper.Output.Implementation;
 
 /// <summary>
 /// Dispatches output text to one or more configured publishers.

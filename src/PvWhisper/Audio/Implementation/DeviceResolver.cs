@@ -1,10 +1,11 @@
 using Pv;
+using PvWhisper.Audio;
 using PvWhisper.Config;
 using PvWhisper.Logging;
 
-namespace PvWhisper.Audio;
+namespace PvWhisper.Audio.Implementation;
 
-public sealed class DeviceResolver
+public sealed class DeviceResolver : IDeviceResolver
 {
     private readonly AppConfig _config;
     private readonly ILogger _logger;

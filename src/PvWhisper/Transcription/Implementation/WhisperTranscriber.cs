@@ -1,9 +1,10 @@
 using System.Text;
 using PvWhisper.Audio;
 using PvWhisper.Text;
+using PvWhisper.Transcription;
 using Whisper.net;
 
-namespace PvWhisper.Transcription;
+namespace PvWhisper.Transcription.Implementation;
 
 public sealed class WhisperTranscriber : IWhisperTranscriber
 {
@@ -12,11 +13,11 @@ public sealed class WhisperTranscriber : IWhisperTranscriber
     private readonly IWavConverter _wavConverter;
     private readonly ITextTransformer _textTransformer;
 
-    public WhisperTranscriber(WhisperProcessor processor, ITextTransformer textTransformer, IWavConverter? wavHelper = null)
+    public WhisperTranscriber(WhisperProcessor processor, ITextTransformer textTransformer, IWavConverter wavConverter)
     {
         _processor = processor ?? throw new ArgumentNullException(nameof(processor));
         _textTransformer = textTransformer ?? throw new ArgumentNullException(nameof(textTransformer));
-        _wavConverter = wavHelper ?? new WavConverter();
+        _wavConverter = wavConverter ?? throw new ArgumentNullException(nameof(wavConverter));
     }
 
     public async Task<string> TranscribeAsync(short[] samples, CancellationToken token)

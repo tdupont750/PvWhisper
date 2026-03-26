@@ -1,9 +1,11 @@
 using System.Threading.Channels;
 using PvWhisper.Config;
+using PvWhisper.Input;
 using PvWhisper.Input.Sources;
+using PvWhisper.Input.Sources.Implementation;
 using PvWhisper.Logging;
 
-namespace PvWhisper.Input;
+namespace PvWhisper.Input.Implementation;
 
 public sealed class CommandChannelFactory : ICommandChannelFactory
 {

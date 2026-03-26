@@ -1,7 +1,8 @@
 using Pv;
+using PvWhisper.Audio;
 using PvWhisper.Logging;
 
-namespace PvWhisper.Audio;
+namespace PvWhisper.Audio.Implementation;
 
 public sealed class CaptureManager : ICaptureManager
 {

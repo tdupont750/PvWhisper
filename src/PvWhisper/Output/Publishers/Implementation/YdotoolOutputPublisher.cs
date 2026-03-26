@@ -1,7 +1,8 @@
 using System.Diagnostics;
 using PvWhisper.Logging;
+using PvWhisper.Output.Publishers;
 
-namespace PvWhisper.Output.Publishers;
+namespace PvWhisper.Output.Publishers.Implementation;
 
 public sealed class YdotoolOutputPublisher : IOutputPublisher
 {

@@ -1,13 +1,13 @@
-using PvWhisper.Logging;
+using PvWhisper.Audio;
 
-namespace PvWhisper.Audio;
+namespace PvWhisper.Audio.Implementation;
 
 /// <summary>
 /// Encapsulates auto-timeout behavior for audio capture.
 /// Arm to start a countdown and invoke a callback when time elapses while still capturing.
 /// Cancel to stop the countdown. Safe for repeated arm/cancel cycles.
 /// </summary>
-public sealed class CaptureTimeoutManager : IDisposable
+public sealed class CaptureTimeoutManager : ICaptureTimeoutManager
 {
     private readonly Func<Task> _onTimeoutAsync;
     private readonly CancellationToken _appToken;

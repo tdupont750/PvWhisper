@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using PvWhisper.Audio;
+using PvWhisper.Audio.Implementation;
 using PvWhisper.Config;
 using PvWhisper.Input;
 using PvWhisper.Logging;
@@ -38,7 +39,7 @@ public sealed class PvWhisperApp
     }
 
     public async Task<int> RunAsync(CancellationTokenSource appCts)
-    {   
+    {
         // Create channel and start input producers via injected factory
         var (channel, consoleProducer, pipeProducer) = _commandChannelFactory.CreateChannelAndStartProducers(appCts.Token);
 
@@ -49,7 +50,7 @@ public sealed class PvWhisperApp
 
         // Ensure console producer finishes (non-blocking source)
         await consoleProducer;
-        
+
         // Ensure pipe producer finishes (non-blocking source)
         if (pipeProducer is { IsCompleted: false })
         {
@@ -71,7 +72,7 @@ public sealed class PvWhisperApp
         CancellationTokenSource appCts)
     {
         // Dedicated capture timeout manager
-        using var timeoutManager = new CaptureTimeoutManager(
+        using ICaptureTimeoutManager timeoutManager = new CaptureTimeoutManager(
             _config.CaptureTimeoutSeconds,
             appCts.Token,
             async () =>
@@ -89,7 +90,7 @@ public sealed class PvWhisperApp
             while (reader.TryRead(out var raw))
             {
                 TryToggleCaptureStatusIndicator(false);
-                
+
                 var cmd = char.ToLowerInvariant(raw);
 
                 if (cmd == 'q')
@@ -131,7 +132,7 @@ public sealed class PvWhisperApp
                         _logger.Error($"Unknown command: '{cmd}'");
                         break;
                 }
-                
+
                 TryToggleCaptureStatusIndicator(true);
             }
         }
@@ -154,9 +155,9 @@ public sealed class PvWhisperApp
         if (_captureManager.IsCapturing)
             _logger.ToggleAlert("--- CAPTURING ---", isShow);
     }
-    
+
     private async Task HandleStopAndTranscribeAsync(CancellationToken token, bool discardTranscribe = false)
-    {   
+    {
         _logger.Info("Stopping capture and transcribing...");
         var samples = await _captureManager.StopCaptureAndGetSamplesAsync();
 
@@ -175,7 +176,7 @@ public sealed class PvWhisperApp
                 _logger.Debug("No text transcribed.");
                 return;
             }
-            
+
             await _outputDispatcher.DispatchAsync(text, token);
         }
         catch (OperationCanceledException)

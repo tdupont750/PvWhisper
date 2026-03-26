@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
+using PvWhisper.Input.Sources;
 
-namespace PvWhisper.Input.Sources;
+namespace PvWhisper.Input.Sources.Implementation;
 
 public sealed class PipeCommandSource : ICommandSource
 {

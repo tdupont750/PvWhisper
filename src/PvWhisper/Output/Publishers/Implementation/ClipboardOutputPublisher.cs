@@ -1,7 +1,8 @@
 using PvWhisper.Logging;
+using PvWhisper.Output.Publishers;
 using TextCopy;
 
-namespace PvWhisper.Output.Publishers;
+namespace PvWhisper.Output.Publishers.Implementation;
 
 public sealed class ClipboardOutputPublisher : IOutputPublisher
 {

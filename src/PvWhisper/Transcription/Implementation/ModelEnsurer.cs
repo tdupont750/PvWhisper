@@ -1,10 +1,11 @@
 using PvWhisper.Config;
-using Whisper.net.Ggml;
 using PvWhisper.Logging;
+using PvWhisper.Transcription;
+using Whisper.net.Ggml;
 
-namespace PvWhisper.Transcription;
+namespace PvWhisper.Transcription.Implementation;
 
-public sealed class ModelEnsurer
+public sealed class ModelEnsurer : IModelEnsurer
 {
     private readonly ILogger _logger;
 

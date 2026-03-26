@@ -1,4 +1,5 @@
-﻿using PvWhisper.Text;
+using PvWhisper.Text;
+using PvWhisper.Text.Implementation;
 
 // ReSharper disable ConvertToConstant.Local
 

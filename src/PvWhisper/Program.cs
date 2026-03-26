@@ -1,11 +1,14 @@
 using System.Text;
 using PvWhisper.Audio;
+using PvWhisper.Audio.Implementation;
 using PvWhisper.Config;
-using PvWhisper.Input;
-using PvWhisper.Logging;
-using PvWhisper.Output;
-using PvWhisper.Text;
+using PvWhisper.Config.Implementation;
+using PvWhisper.Input.Implementation;
+using PvWhisper.Logging.Implementation;
+using PvWhisper.Output.Implementation;
+using PvWhisper.Text.Implementation;
 using PvWhisper.Transcription;
+using PvWhisper.Transcription.Implementation;
 using Whisper.net;
 
 namespace PvWhisper;
@@ -17,7 +20,7 @@ internal static class Program
         Console.OutputEncoding = Encoding.UTF8;
 
         var logger = new Logger();
-        var configService = new ConfigService(logger);
+        IConfigService configService = new ConfigService(logger);
 
         AppConfig config;
         try
@@ -47,7 +50,8 @@ internal static class Program
                 return 1;
             }
 
-            var modelPath = await new ModelEnsurer(logger).EnsureModelAsync(config.ModelType, config.ModelDir, appCts.Token);
+            IModelEnsurer modelEnsurer = new ModelEnsurer(logger);
+            var modelPath = await modelEnsurer.EnsureModelAsync(config.ModelType, config.ModelDir, appCts.Token);
 
             using var whisperFactory = WhisperFactory.FromPath(modelPath);
             await using var processor = whisperFactory
@@ -61,7 +65,7 @@ internal static class Program
                 new TextTransformer(config.TextTransforms, new RegexReplacer()),
                 new WavConverter());
 
-            var deviceResolver = new DeviceResolver(config, logger);
+            IDeviceResolver deviceResolver = new DeviceResolver(config, logger);
             deviceResolver.LogAvailable();
 
             var captureManager = new CaptureManager(deviceResolver.Resolve, frameLength: 512, logger);
@@ -89,7 +93,7 @@ internal static class Program
         return 0;
     }
 
-    private static void PrintStartupInfo(AppConfig appConfig, ILogger logger)
+    private static void PrintStartupInfo(AppConfig appConfig, PvWhisper.Logging.ILogger logger)
     {
         logger.Debug("PvWhisper – A cross platform Speech to Text program");
 
