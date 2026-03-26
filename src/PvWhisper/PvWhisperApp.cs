@@ -92,7 +92,7 @@ public sealed class PvWhisperApp
 
                 var cmd = char.ToLowerInvariant(raw);
 
-                if (cmd == 'q')
+                if (cmd == 'q' || cmd == '\x1B')
                 {
                     _logger.Debug("Stopping...");
                     timeoutManager.Cancel();

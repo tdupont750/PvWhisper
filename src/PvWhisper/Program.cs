@@ -121,7 +121,7 @@ internal static class Program
         logger.Debug("  c = start capture");
         logger.Debug("  z = stop capture and discard audio");
         logger.Debug("  x = stop capture and transcribe");
-        logger.Debug("  q = quit");
+        logger.Debug("  q / Esc = quit");
 
         if (!appConfig.HasPipeSource) return;
 
