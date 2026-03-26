@@ -1,5 +1,3 @@
-using System.Threading.Channels;
-
 namespace PvWhisper.Input;
 
 /// <summary>
@@ -8,6 +6,5 @@ namespace PvWhisper.Input;
 /// </summary>
 public interface ICommandChannelFactory
 {
-    (Channel<char> channel, Task consoleProducer, Task? pipeProducer) CreateChannelAndStartProducers(
-        CancellationToken token);
+    CommandChannelResult CreateChannelAndStartProducers(CancellationToken token);
 }

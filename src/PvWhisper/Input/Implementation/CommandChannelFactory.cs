@@ -18,8 +18,7 @@ public sealed class CommandChannelFactory : ICommandChannelFactory
         _logger = logger;
     }
 
-    public (Channel<char> channel, Task consoleProducer, Task? pipeProducer) CreateChannelAndStartProducers(
-        CancellationToken token)
+    public CommandChannelResult CreateChannelAndStartProducers(CancellationToken token)
     {
         var channel = Channel.CreateUnbounded<char>();
 
@@ -39,7 +38,7 @@ public sealed class CommandChannelFactory : ICommandChannelFactory
                 token);
         }
 
-        return (channel, consoleProducer, pipeProducer);
+        return new CommandChannelResult(channel, consoleProducer, pipeProducer);
     }
 
     private async Task ProduceCommandsAsync(

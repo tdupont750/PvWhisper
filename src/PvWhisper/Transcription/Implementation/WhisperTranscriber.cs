@@ -20,12 +20,12 @@ public sealed class WhisperTranscriber : IWhisperTranscriber
         _wavConverter = wavConverter ?? throw new ArgumentNullException(nameof(wavConverter));
     }
 
-    public async Task<string> TranscribeAsync(short[] samples, CancellationToken token)
+    public async Task<string> TranscribeAsync(AudioBuffer audio, CancellationToken token)
     {
-        if (samples == null || samples.Length == 0)
+        if (audio == null || audio.Samples.Length == 0)
             return string.Empty;
 
-        using var wavStream = _wavConverter.CreateWavFromPcm16(samples, SampleRate);
+        using var wavStream = _wavConverter.CreateWavFromPcm16(audio.Samples, SampleRate);
         var sb = new StringBuilder();
 
         await foreach (var segment in _processor.ProcessAsync(wavStream, token))

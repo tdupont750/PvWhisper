@@ -6,7 +6,7 @@ namespace PvWhisper.Config;
 public sealed class AppConfig
 {
     public bool HasPipeSource => !string.IsNullOrWhiteSpace(PipePath);
-    
+
     public int? DeviceIndex { get; set; }
     public string? DeviceName { get; set; }
     public string? PipePath { get; set; }
@@ -19,8 +19,10 @@ public sealed class AppConfig
     public string? ModelDir { get; set; }
 
     // Number of threads to use by Whisper for processing
-    // Default is 8
     public int WhisperThreads { get; set; } = 8;
+
+    // Number of audio frames per read from the microphone
+    public int FrameLength { get; set; } = 512;
 
     // Ordered text transforms applied to transcribed text
     public List<TextTransformConfig>? TextTransforms { get; set; }

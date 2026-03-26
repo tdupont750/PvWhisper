@@ -26,16 +26,13 @@ public sealed class CaptureTimeoutManager : ICaptureTimeoutManager
         _onTimeoutAsync = onTimeoutAsync;
     }
 
-    /// <summary>
-    /// Arms the timeout countdown. Cancels any previously armed countdown.
-    /// No-op if timeoutSeconds is non-positive.
-    /// </summary>
-    public Task RestartTimeoutAsync()
+    /// <inheritdoc/>
+    public void RestartTimeout()
     {
         Cancel();
 
         if (_timeoutSeconds <= 0)
-            return Task.CompletedTask;
+            return;
 
         var linked = CancellationTokenSource.CreateLinkedTokenSource(_appToken);
         CancellationTokenSource localCts;
@@ -45,7 +42,7 @@ public sealed class CaptureTimeoutManager : ICaptureTimeoutManager
             localCts = _cts;
         }
 
-        return RunDelayAsync(localCts);
+        _ = RunDelayAsync(localCts);
     }
 
     private async Task RunDelayAsync(CancellationTokenSource localCts)

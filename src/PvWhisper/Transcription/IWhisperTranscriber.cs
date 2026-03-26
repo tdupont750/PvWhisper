@@ -1,6 +1,8 @@
+using PvWhisper.Audio;
+
 namespace PvWhisper.Transcription;
 
 public interface IWhisperTranscriber
 {
-    Task<string> TranscribeAsync(short[] samples, CancellationToken token);
+    Task<string> TranscribeAsync(AudioBuffer audio, CancellationToken token);
 }

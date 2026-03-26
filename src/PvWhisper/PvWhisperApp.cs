@@ -40,25 +40,24 @@ public sealed class PvWhisperApp
 
     public async Task<int> RunAsync(CancellationTokenSource appCts)
     {
-        // Create channel and start input producers via injected factory
-        var (channel, consoleProducer, pipeProducer) = _commandChannelFactory.CreateChannelAndStartProducers(appCts.Token);
+        var result = _commandChannelFactory.CreateChannelAndStartProducers(appCts.Token);
 
-        await ProcessCommandsAsync(channel.Reader, appCts);
+        await ProcessCommandsAsync(result.Channel.Reader, appCts);
 
         // Signal producers that no more writes are accepted
-        channel.Writer.TryComplete();
+        result.Channel.Writer.TryComplete();
 
         // Ensure console producer finishes (non-blocking source)
-        await consoleProducer;
+        await result.ConsoleProducer;
 
         // Ensure pipe producer finishes (non-blocking source)
-        if (pipeProducer is { IsCompleted: false })
+        if (result.PipeProducer is { IsCompleted: false })
         {
             // Pipe producer may be deadlocked trying to read an empty pipe,
-            // so wait up to 5 seconds for it to finish
+            // so wait up to 2 seconds for it to finish
             var shutdownTask = Task.Delay(TimeSpan.FromSeconds(2));
-            await Task.WhenAny(shutdownTask, pipeProducer);
-            if (!pipeProducer.IsCompleted)
+            await Task.WhenAny(shutdownTask, result.PipeProducer);
+            if (!result.PipeProducer.IsCompleted)
             {
                 _logger.Warn("Pipe producer did not shut down in time; ignoring and continuing with shutdown.");
             }
@@ -110,11 +109,11 @@ public sealed class PvWhisperApp
                         break;
                     case 'v':
                         await HandleStartCaptureAsync();
-                        _ = timeoutManager.RestartTimeoutAsync();
+                        timeoutManager.RestartTimeout();
                         break;
                     case 'c':
                         await HandleStartCaptureAsync();
-                        _ = timeoutManager.RestartTimeoutAsync();
+                        timeoutManager.RestartTimeout();
                         break;
                     case 'z':
                         timeoutManager.Cancel();
@@ -159,9 +158,9 @@ public sealed class PvWhisperApp
     private async Task HandleStopAndTranscribeAsync(CancellationToken token, bool discardTranscribe = false)
     {
         _logger.Info("Stopping capture and transcribing...");
-        var samples = await _captureManager.StopCaptureAndGetSamplesAsync();
+        var audio = await _captureManager.StopCaptureAndGetSamplesAsync();
 
-        if (discardTranscribe || samples == null || samples.Length == 0)
+        if (discardTranscribe || audio == null || audio.Samples.Length == 0)
         {
             _logger.Info("No audio captured to transcribe.");
             return;
@@ -169,7 +168,7 @@ public sealed class PvWhisperApp
 
         try
         {
-            var text = await _transcriber.TranscribeAsync(samples, token);
+            var text = await _transcriber.TranscribeAsync(audio, token);
 
             if (string.IsNullOrWhiteSpace(text))
             {

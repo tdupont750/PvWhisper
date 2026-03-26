@@ -8,6 +8,7 @@
   "modelType": "Base",
   "pipePath": "/tmp/pvwhisper.fifo",
   "whisperThreads": 8,
+  "frameLength": 512,
   "textTransforms": [{
     "description": "Capitalize first letter",
     "find": "^(\\w)",

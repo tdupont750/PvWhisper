@@ -6,6 +6,8 @@ using PvWhisper.Config.Implementation;
 using PvWhisper.Input.Implementation;
 using PvWhisper.Logging.Implementation;
 using PvWhisper.Output.Implementation;
+using PvWhisper.Output.Publishers;
+using PvWhisper.Output.Publishers.Implementation;
 using PvWhisper.Text.Implementation;
 using PvWhisper.Transcription;
 using PvWhisper.Transcription.Implementation;
@@ -68,8 +70,9 @@ internal static class Program
             IDeviceResolver deviceResolver = new DeviceResolver(config, logger);
             deviceResolver.LogAvailable();
 
-            var captureManager = new CaptureManager(deviceResolver.Resolve, frameLength: 512, logger);
-            var outputDispatcher = new OutputDispatcher(config.Outputs, logger);
+            var publishers = BuildPublishers(config, logger);
+            var captureManager = new CaptureManager(deviceResolver, config.FrameLength, logger);
+            var outputDispatcher = new OutputDispatcher(publishers);
             var commandChannelFactory = new CommandChannelFactory(config, logger);
 
             var app = new PvWhisperApp(config, captureManager, transcriber, outputDispatcher, commandChannelFactory, logger);
@@ -91,6 +94,22 @@ internal static class Program
 
         logger.Debug("PvWhisper stopped.");
         return 0;
+    }
+
+    private static IReadOnlyCollection<IOutputPublisher> BuildPublishers(
+        AppConfig config,
+        PvWhisper.Logging.ILogger logger)
+    {
+        return config.Outputs
+            .Distinct()
+            .Select<OutputTarget, IOutputPublisher>(t => t switch
+            {
+                OutputTarget.Console   => new ConsoleOutputPublisher(),
+                OutputTarget.Clipboard => new ClipboardOutputPublisher(logger),
+                OutputTarget.Ydotool   => new YdotoolOutputPublisher(logger),
+                _ => throw new ArgumentOutOfRangeException(nameof(t), t, "Unknown output target")
+            })
+            .ToList();
     }
 
     private static void PrintStartupInfo(AppConfig appConfig, PvWhisper.Logging.ILogger logger)

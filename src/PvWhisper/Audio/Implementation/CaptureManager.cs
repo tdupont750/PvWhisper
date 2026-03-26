@@ -7,7 +7,7 @@ namespace PvWhisper.Audio.Implementation;
 public sealed class CaptureManager : ICaptureManager
 {
     private PvRecorder? _recorder;
-    private readonly Func<int> _deviceIndexResolver;
+    private readonly IDeviceResolver _deviceResolver;
     private readonly int _frameLength;
     private readonly ILogger _logger;
     private readonly Lock _lock = new();
@@ -18,9 +18,9 @@ public sealed class CaptureManager : ICaptureManager
 
     public bool IsCapturing { get; private set; }
 
-    public CaptureManager(Func<int> deviceIndexResolver, int frameLength, ILogger logger)
+    public CaptureManager(IDeviceResolver deviceResolver, int frameLength, ILogger logger)
     {
-        _deviceIndexResolver = deviceIndexResolver;
+        _deviceResolver = deviceResolver;
         _frameLength = frameLength;
         _logger = logger;
     }
@@ -36,7 +36,7 @@ public sealed class CaptureManager : ICaptureManager
             _captureCts = new CancellationTokenSource();
             IsCapturing = true;
             // Lazily create and start recorder only while actively capturing
-            _recorder = PvRecorder.Create(frameLength: _frameLength, deviceIndex: _deviceIndexResolver());
+            _recorder = PvRecorder.Create(frameLength: _frameLength, deviceIndex: _deviceResolver.Resolve());
             _recorder.Start();
             _captureTask = Task.Run(() => CaptureLoop(_captureCts.Token), _captureCts.Token);
         }
@@ -46,90 +46,59 @@ public sealed class CaptureManager : ICaptureManager
 
     public async Task StopCaptureAndDiscardAsync()
     {
-        List<short>? discardBuffer;
-        Task? captureTaskToWait;
-        CancellationTokenSource? cts;
-
-        lock (_lock)
-        {
-            if (!IsCapturing)
-                return;
-
-            IsCapturing = false;
-            discardBuffer = _buffer;
-            _buffer = null;
-
-            cts = _captureCts;
-            _captureCts = null;
-
-            captureTaskToWait = _captureTask;
-            _captureTask = null;
-        }
-
-        if (cts != null)
-            await cts.CancelAsync();
-
-        if (captureTaskToWait != null)
-        {
-            try
-            {
-                await captureTaskToWait;
-            }
-            catch (OperationCanceledException)
-            {
-                // expected
-            }
-        }
-
-        StopAndDisposeRecorderSafe();
-
-        discardBuffer?.Clear();
+        var buffer = await ExtractAndStopAsync();
+        buffer?.Clear();
     }
 
-    public async Task<short[]?> StopCaptureAndGetSamplesAsync()
+    public async Task<AudioBuffer?> StopCaptureAndGetSamplesAsync()
     {
-        List<short>? bufferSnapshot;
-        Task? captureTaskToWait;
+        // If not currently capturing, return any remaining buffered samples
+        lock (_lock)
+        {
+            if (!IsCapturing)
+            {
+                var remaining = _buffer;
+                _buffer = null;
+                return remaining == null ? null : new AudioBuffer(remaining.ToArray());
+            }
+        }
+
+        var buffer = await ExtractAndStopAsync();
+        return buffer == null ? null : new AudioBuffer(buffer.ToArray());
+    }
+
+    /// <summary>
+    /// Atomically marks capture as stopped, cancels the capture task, and disposes the recorder.
+    /// Returns the buffer snapshot, or null if not capturing.
+    /// </summary>
+    private async Task<List<short>?> ExtractAndStopAsync()
+    {
+        List<short>? buffer;
+        Task? captureTask;
         CancellationTokenSource? cts;
 
         lock (_lock)
         {
             if (!IsCapturing)
-            {
-                bufferSnapshot = _buffer;
-                _buffer = null;
-                return bufferSnapshot?.ToArray();
-            }
+                return null;
 
             IsCapturing = false;
-            bufferSnapshot = _buffer;
-            _buffer = null;
-
-            cts = _captureCts;
-            _captureCts = null;
-
-            captureTaskToWait = _captureTask;
-            _captureTask = null;
+            buffer = _buffer; _buffer = null;
+            cts = _captureCts; _captureCts = null;
+            captureTask = _captureTask; _captureTask = null;
         }
 
         if (cts != null)
             await cts.CancelAsync();
 
-        if (captureTaskToWait != null)
+        if (captureTask != null)
         {
-            try
-            {
-                await captureTaskToWait;
-            }
-            catch (OperationCanceledException)
-            {
-                // expected
-            }
+            try { await captureTask; }
+            catch (OperationCanceledException) { }
         }
 
         StopAndDisposeRecorderSafe();
-
-        return bufferSnapshot?.ToArray();
+        return buffer;
     }
 
     private void CaptureLoop(CancellationToken token)
