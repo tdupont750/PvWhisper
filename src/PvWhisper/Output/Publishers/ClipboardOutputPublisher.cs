@@ -1,14 +1,13 @@
 using PvWhisper.Logging;
-using PvWhisper.Output.Publishers;
 using TextCopy;
 
-namespace PvWhisper.Output.Publishers.Implementation;
+namespace PvWhisper.Output.Publishers;
 
 public sealed class ClipboardOutputPublisher : IOutputPublisher
 {
-    private readonly ILogger _logger;
+    private readonly Logger _logger;
 
-    public ClipboardOutputPublisher(ILogger logger)
+    public ClipboardOutputPublisher(Logger logger)
     {
         _logger = logger;
     }

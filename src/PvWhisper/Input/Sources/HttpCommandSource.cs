@@ -1,18 +1,17 @@
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
-using PvWhisper.Input.Sources;
 using PvWhisper.Logging;
 
-namespace PvWhisper.Input.Sources.Implementation;
+namespace PvWhisper.Input.Sources;
 
 public sealed class HttpCommandSource : ICommandSource, IDisposable
 {
     private readonly HttpListener _listener;
-    private readonly ILogger _logger;
+    private readonly Logger _logger;
     private readonly int _port;
 
-    public HttpCommandSource(int port, ILogger logger)
+    public HttpCommandSource(int port, Logger logger)
     {
         _port = port;
         _logger = logger;

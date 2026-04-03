@@ -1,10 +1,9 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
-using PvWhisper.Text;
 
-namespace PvWhisper.Text.Implementation;
+namespace PvWhisper.Text;
 
-public sealed class RegexReplacer : IRegexReplacer
+public sealed class RegexReplacer
 {
     /// <summary>
     /// Replaces text in <paramref name="input"/> using a regex <paramref name="pattern"/> and a custom

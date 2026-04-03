@@ -1,18 +1,16 @@
 using System.Threading.Channels;
 using PvWhisper.Config;
-using PvWhisper.Input;
 using PvWhisper.Input.Sources;
-using PvWhisper.Input.Sources.Implementation;
 using PvWhisper.Logging;
 
-namespace PvWhisper.Input.Implementation;
+namespace PvWhisper.Input;
 
-public sealed class CommandChannelFactory : ICommandChannelFactory
+public sealed class CommandChannelFactory
 {
     private readonly AppConfig _config;
-    private readonly ILogger _logger;
+    private readonly Logger _logger;
 
-    public CommandChannelFactory(AppConfig config, ILogger logger)
+    public CommandChannelFactory(AppConfig config, Logger logger)
     {
         _config = config;
         _logger = logger;

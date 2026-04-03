@@ -1,15 +1,14 @@
 using Pv;
-using PvWhisper.Audio;
 using PvWhisper.Logging;
 
-namespace PvWhisper.Audio.Implementation;
+namespace PvWhisper.Audio;
 
-public sealed class CaptureManager : ICaptureManager
+public sealed class CaptureManager
 {
     private PvRecorder? _recorder;
-    private readonly IDeviceResolver _deviceResolver;
+    private readonly DeviceResolver _deviceResolver;
     private readonly int _frameLength;
-    private readonly ILogger _logger;
+    private readonly Logger _logger;
     private readonly Lock _lock = new();
 
     private List<short>? _buffer;
@@ -18,7 +17,7 @@ public sealed class CaptureManager : ICaptureManager
 
     public bool IsCapturing { get; private set; }
 
-    public CaptureManager(IDeviceResolver deviceResolver, int frameLength, ILogger logger)
+    public CaptureManager(DeviceResolver deviceResolver, int frameLength, Logger logger)
     {
         _deviceResolver = deviceResolver;
         _frameLength = frameLength;

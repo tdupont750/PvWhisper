@@ -1,15 +1,14 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using PvWhisper.Config;
 using PvWhisper.Logging;
 
-namespace PvWhisper.Config.Implementation;
+namespace PvWhisper.Config;
 
-public sealed class ConfigService : IConfigService
+public sealed class ConfigService
 {
-    private readonly ILogger _logger;
+    private readonly Logger _logger;
 
-    public ConfigService(ILogger logger)
+    public ConfigService(Logger logger)
     {
         _logger = logger;
     }

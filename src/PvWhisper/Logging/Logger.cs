@@ -1,11 +1,9 @@
-using PvWhisper.Logging;
-
-namespace PvWhisper.Logging.Implementation;
+namespace PvWhisper.Logging;
 
 /// <summary>
 /// Console logger implementation.
 /// </summary>
-public sealed class Logger : ILogger
+public sealed class Logger
 {
     public bool DebugEnabled { get; set; } = true;
 

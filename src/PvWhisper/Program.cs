@@ -1,16 +1,12 @@
 using System.Text;
 using PvWhisper.Audio;
-using PvWhisper.Audio.Implementation;
 using PvWhisper.Config;
-using PvWhisper.Config.Implementation;
-using PvWhisper.Input.Implementation;
-using PvWhisper.Logging.Implementation;
-using PvWhisper.Output.Implementation;
+using PvWhisper.Input;
+using PvWhisper.Logging;
+using PvWhisper.Output;
 using PvWhisper.Output.Publishers;
-using PvWhisper.Output.Publishers.Implementation;
-using PvWhisper.Text.Implementation;
+using PvWhisper.Text;
 using PvWhisper.Transcription;
-using PvWhisper.Transcription.Implementation;
 using Whisper.net;
 
 namespace PvWhisper;
@@ -22,7 +18,7 @@ internal static class Program
         Console.OutputEncoding = Encoding.UTF8;
 
         var logger = new Logger();
-        IConfigService configService = new ConfigService(logger);
+        var configService = new ConfigService(logger);
 
         AppConfig config;
         try
@@ -52,7 +48,7 @@ internal static class Program
                 return 1;
             }
 
-            IModelEnsurer modelEnsurer = new ModelEnsurer(logger);
+            var modelEnsurer = new ModelEnsurer(logger);
             var modelPath = await modelEnsurer.EnsureModelAsync(config.ModelType, config.ModelDir, appCts.Token);
 
             using var whisperFactory = WhisperFactory.FromPath(modelPath);
@@ -67,7 +63,7 @@ internal static class Program
                 new TextTransformer(config.TextTransforms, new RegexReplacer()),
                 new WavConverter());
 
-            IDeviceResolver deviceResolver = new DeviceResolver(config, logger);
+            var deviceResolver = new DeviceResolver(config, logger);
             deviceResolver.LogAvailable();
 
             var publishers = BuildPublishers(config, logger);
@@ -98,7 +94,7 @@ internal static class Program
 
     private static IReadOnlyCollection<IOutputPublisher> BuildPublishers(
         AppConfig config,
-        PvWhisper.Logging.ILogger logger)
+        Logger logger)
     {
         return config.Outputs
             .Distinct()
@@ -112,7 +108,7 @@ internal static class Program
             .ToList();
     }
 
-    private static void PrintStartupInfo(AppConfig appConfig, PvWhisper.Logging.ILogger logger)
+    private static void PrintStartupInfo(AppConfig appConfig, Logger logger)
     {
         logger.Debug("PvWhisper – A cross platform Speech to Text program");
 

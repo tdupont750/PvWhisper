@@ -1,19 +1,18 @@
 using System.Text;
 using PvWhisper.Audio;
 using PvWhisper.Text;
-using PvWhisper.Transcription;
 using Whisper.net;
 
-namespace PvWhisper.Transcription.Implementation;
+namespace PvWhisper.Transcription;
 
-public sealed class WhisperTranscriber : IWhisperTranscriber
+public sealed class WhisperTranscriber
 {
     private const int SampleRate = 16000;
     private readonly WhisperProcessor _processor;
-    private readonly IWavConverter _wavConverter;
-    private readonly ITextTransformer _textTransformer;
+    private readonly WavConverter _wavConverter;
+    private readonly TextTransformer _textTransformer;
 
-    public WhisperTranscriber(WhisperProcessor processor, ITextTransformer textTransformer, IWavConverter wavConverter)
+    public WhisperTranscriber(WhisperProcessor processor, TextTransformer textTransformer, WavConverter wavConverter)
     {
         _processor = processor ?? throw new ArgumentNullException(nameof(processor));
         _textTransformer = textTransformer ?? throw new ArgumentNullException(nameof(textTransformer));

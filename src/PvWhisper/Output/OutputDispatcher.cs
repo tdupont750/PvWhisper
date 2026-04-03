@@ -1,12 +1,11 @@
-using PvWhisper.Output;
 using PvWhisper.Output.Publishers;
 
-namespace PvWhisper.Output.Implementation;
+namespace PvWhisper.Output;
 
 /// <summary>
 /// Dispatches output text to one or more configured publishers.
 /// </summary>
-public sealed class OutputDispatcher : IOutputDispatcher
+public sealed class OutputDispatcher
 {
     private readonly IReadOnlyCollection<IOutputPublisher> _publishers;
 

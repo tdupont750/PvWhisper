@@ -1,5 +1,4 @@
 using PvWhisper.Text;
-using PvWhisper.Text.Implementation;
 
 // ReSharper disable ConvertToConstant.Local
 
@@ -7,7 +6,7 @@ namespace PvWhisper.Tests;
 
 public class RegexReplacerTests
 {
-    private static readonly IRegexReplacer Replacer = new RegexReplacer();
+    private static readonly RegexReplacer Replacer = new RegexReplacer();
 
     [Fact]
     public void ReplaceWithGroups_UppercasesFirstCharAfterSpace()

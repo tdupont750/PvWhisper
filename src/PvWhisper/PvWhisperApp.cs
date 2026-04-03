@@ -1,6 +1,5 @@
 using System.Threading.Channels;
 using PvWhisper.Audio;
-using PvWhisper.Audio.Implementation;
 using PvWhisper.Config;
 using PvWhisper.Input;
 using PvWhisper.Logging;
@@ -16,19 +15,19 @@ namespace PvWhisper;
 public sealed class PvWhisperApp
 {
     private readonly AppConfig _config;
-    private readonly ICaptureManager _captureManager;
-    private readonly IWhisperTranscriber _transcriber;
-    private readonly IOutputDispatcher _outputDispatcher;
-    private readonly ICommandChannelFactory _commandChannelFactory;
-    private readonly ILogger _logger;
+    private readonly CaptureManager _captureManager;
+    private readonly WhisperTranscriber _transcriber;
+    private readonly OutputDispatcher _outputDispatcher;
+    private readonly CommandChannelFactory _commandChannelFactory;
+    private readonly Logger _logger;
 
     public PvWhisperApp(
         AppConfig config,
-        ICaptureManager captureManager,
-        IWhisperTranscriber transcriber,
-        IOutputDispatcher outputDispatcher,
-        ICommandChannelFactory commandChannelFactory,
-        ILogger logger)
+        CaptureManager captureManager,
+        WhisperTranscriber transcriber,
+        OutputDispatcher outputDispatcher,
+        CommandChannelFactory commandChannelFactory,
+        Logger logger)
     {
         _config = config;
         _captureManager = captureManager;
@@ -69,7 +68,7 @@ public sealed class PvWhisperApp
         CancellationTokenSource appCts)
     {
         // Dedicated capture timeout manager
-        using ICaptureTimeoutManager timeoutManager = new CaptureTimeoutManager(
+        using var timeoutManager = new CaptureTimeoutManager(
             _config.CaptureTimeoutSeconds,
             appCts.Token,
             async () =>

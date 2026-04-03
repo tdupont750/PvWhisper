@@ -1,14 +1,13 @@
 using System.Diagnostics;
 using PvWhisper.Logging;
-using PvWhisper.Output.Publishers;
 
-namespace PvWhisper.Output.Publishers.Implementation;
+namespace PvWhisper.Output.Publishers;
 
 public sealed class YdotoolOutputPublisher : IOutputPublisher
 {
-    private readonly ILogger _logger;
+    private readonly Logger _logger;
 
-    public YdotoolOutputPublisher(ILogger logger)
+    public YdotoolOutputPublisher(Logger logger)
     {
         _logger = logger;
     }

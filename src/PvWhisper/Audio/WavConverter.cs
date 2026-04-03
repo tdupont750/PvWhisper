@@ -1,9 +1,8 @@
 using System.Text;
-using PvWhisper.Audio;
 
-namespace PvWhisper.Audio.Implementation;
+namespace PvWhisper.Audio;
 
-public sealed class WavConverter : IWavConverter
+public sealed class WavConverter
 {
     public MemoryStream CreateWavFromPcm16(short[] samples, int sampleRate)
     {

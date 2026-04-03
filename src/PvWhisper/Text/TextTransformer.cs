@@ -1,14 +1,13 @@
 using System.Text.RegularExpressions;
-using PvWhisper.Text;
 
-namespace PvWhisper.Text.Implementation;
+namespace PvWhisper.Text;
 
-public sealed class TextTransformer : ITextTransformer
+public sealed class TextTransformer
 {
     private readonly List<TextTransformConfig> _transforms;
-    private readonly IRegexReplacer _regexReplacer;
+    private readonly RegexReplacer _regexReplacer;
 
-    public TextTransformer(IEnumerable<TextTransformConfig>? transforms, IRegexReplacer regexReplacer)
+    public TextTransformer(IEnumerable<TextTransformConfig>? transforms, RegexReplacer regexReplacer)
     {
         _transforms = transforms?.Where(t => t != null).ToList() ?? new List<TextTransformConfig>();
         _regexReplacer = regexReplacer ?? throw new ArgumentNullException(nameof(regexReplacer));
