@@ -37,6 +37,29 @@ if ! pgrep -x ydotoold &>/dev/null; then
   exit 1
 fi
 
+# Guard against concurrent instances
+LOCK_FILE="/tmp/pvwhisper.lock"
+exec 9>"$LOCK_FILE"
+if ! flock -n 9; then
+  ERROR "Another instance of PvWhisper is already running"
+  exit 1
+fi
+
+INIT_PID=""
+
+cleanup() {
+  if [[ -n "$INIT_PID" ]]; then
+    wait "$INIT_PID" 2>/dev/null || true
+  fi
+  if [[ -p "$PIPE_PATH" ]]; then
+    DEBUG "Writer - Removing named pipe '$PIPE_PATH'"
+    rm -f "$PIPE_PATH"
+  else
+    ERROR "Writer - Could not find '$PIPE_PATH'"
+  fi
+}
+trap cleanup EXIT
+
 # Create the named pipe if it doesn't exist
 if [[ -e "$PIPE_PATH" && ! -p "$PIPE_PATH" ]]; then
   ERROR "Writer - '$PIPE_PATH' exists but is not a named pipe"
@@ -61,6 +84,7 @@ DEBUG "Writer - Initalizing pipe '$PIPE_PATH'"
         ERROR "Writer - Failed to initialize pipe '$PIPE_PATH'"
     fi
 ) &
+INIT_PID=$!
 
 # Run the .NET project. Configuration is read from AppConfig.json only.
 set +e
@@ -69,14 +93,6 @@ EXIT_CODE=$?
 set -e
 
 DEBUG "PvWhisper exited with code: $EXIT_CODE"
-
-# Clean up: remove the named pipe
-if [[ -p "$PIPE_PATH" ]]; then
-  DEBUG "Writer - Removing named pipe '$PIPE_PATH'"
-  rm -f "$PIPE_PATH"
-else
-  ERROR "Writer - Could not find '$PIPE_PATH'"
-fi
 
 INFO "Done!"
 exit "$EXIT_CODE"
