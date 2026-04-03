@@ -25,6 +25,18 @@ DEBUG "Using directory: $ROOT_DIR"
 DEBUG "Using pipe:      $PIPE_PATH"
 DEBUG "Using project:   $PROJECT_PATH"
 
+# Check dotnet is installed
+if ! command -v dotnet &>/dev/null; then
+  ERROR "dotnet is not installed or not in PATH"
+  exit 1
+fi
+
+# Check ydotoold daemon is running
+if ! pgrep -x ydotoold &>/dev/null; then
+  ERROR "ydotoold daemon is not running — start it with: ydotoold &"
+  exit 1
+fi
+
 # Create the named pipe if it doesn't exist
 if [[ -e "$PIPE_PATH" && ! -p "$PIPE_PATH" ]]; then
   ERROR "Writer - '$PIPE_PATH' exists but is not a named pipe"
