@@ -6,7 +6,7 @@
   "language": "en",
   "modelDir": "~/WhisperModels",
   "modelType": "Base",
-  "pipePath": "/tmp/pvwhisper.fifo",
+  "httpPort": 5000,
   "whisperThreads": 8,
   "frameLength": 512,
   "textTransforms": [{

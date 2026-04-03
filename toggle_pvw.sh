@@ -1,9 +1,5 @@
 #!/bin/bash
 
-FIFO_FILE='/tmp/pvwhisper.fifo'
+PORT="${1:-5000}"
 
-# If it doesn't exist or is not a FIFO, do nothing
-[[ -p "$FIFO_FILE" ]] || exit 0
-
-# Abort if write can't proceed
-timeout 1 bash -c "echo -n 'v' > '$FIFO_FILE'" >/dev/null 2>&1 || true
+curl -s -X POST "http://localhost:${PORT}/command/v" || true

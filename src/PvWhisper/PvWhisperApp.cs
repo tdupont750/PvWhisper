@@ -50,16 +50,14 @@ public sealed class PvWhisperApp
         // Ensure console producer finishes (non-blocking source)
         await result.ConsoleProducer;
 
-        // Ensure pipe producer finishes (non-blocking source)
-        if (result.PipeProducer is { IsCompleted: false })
+        // Ensure HTTP producer finishes
+        if (result.HttpProducer is { IsCompleted: false })
         {
-            // Pipe producer may be deadlocked trying to read an empty pipe,
-            // so wait up to 2 seconds for it to finish
             var shutdownTask = Task.Delay(TimeSpan.FromSeconds(2));
-            await Task.WhenAny(shutdownTask, result.PipeProducer);
-            if (!result.PipeProducer.IsCompleted)
+            await Task.WhenAny(shutdownTask, result.HttpProducer);
+            if (!result.HttpProducer.IsCompleted)
             {
-                _logger.Warn("Pipe producer did not shut down in time; ignoring and continuing with shutdown.");
+                _logger.Warn("HTTP producer did not shut down in time; ignoring and continuing with shutdown.");
             }
         }
 
@@ -125,7 +123,7 @@ public sealed class PvWhisperApp
                         await HandleStopAndTranscribeAsync(appCts.Token);
                         break;
                     case 'i':
-                        _logger.Debug($"Reader - Successfully initialized pipe '{_config.PipePath}'");
+                        // ignore (legacy sentinel, no-op)
                         break;
                     default:
                         _logger.Error($"Unknown command: '{cmd}'");

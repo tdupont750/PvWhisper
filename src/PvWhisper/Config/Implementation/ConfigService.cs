@@ -70,12 +70,6 @@ public sealed class ConfigService : IConfigService
         var config = JsonSerializer.Deserialize<AppConfig>(json, options)
                      ?? throw new InvalidOperationException("Failed to deserialize AppConfig.json into AppConfig.");
 
-        // Validate paths without applying defaults
-        if (!string.IsNullOrWhiteSpace(config.PipePath) && !File.Exists(config.PipePath))
-        {
-            _logger.Warn($"Pipe file does not exist: {config.PipePath}.");
-        }
-
         // Validate model directory; if specified and doesn't exist, fail.
         if (!string.IsNullOrWhiteSpace(config.ModelDir))
         {

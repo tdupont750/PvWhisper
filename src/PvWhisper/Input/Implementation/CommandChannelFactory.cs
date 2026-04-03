@@ -28,17 +28,17 @@ public sealed class CommandChannelFactory : ICommandChannelFactory
             () => ProduceCommandsAsync(consoleSource, channel.Writer, token),
             token);
 
-        // Optional pipe input (simultaneous)
-        Task? pipeProducer = null;
-        if (_config.HasPipeSource)
+        // Optional HTTP input (simultaneous)
+        Task? httpProducer = null;
+        if (_config.HasHttpSource)
         {
-            var pipeSource = new PipeCommandSource(_config.PipePath!);
-            pipeProducer = Task.Run(
-                () => ProduceCommandsAsync(pipeSource, channel.Writer, token),
+            var httpSource = new HttpCommandSource(_config.HttpPort, _logger);
+            httpProducer = Task.Run(
+                () => ProduceCommandsAsync(httpSource, channel.Writer, token),
                 token);
         }
 
-        return new CommandChannelResult(channel, consoleProducer, pipeProducer);
+        return new CommandChannelResult(channel, consoleProducer, httpProducer);
     }
 
     private async Task ProduceCommandsAsync(

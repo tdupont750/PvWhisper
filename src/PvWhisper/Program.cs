@@ -123,10 +123,10 @@ internal static class Program
         logger.Debug("  x = stop capture and transcribe");
         logger.Debug("  q / Esc = quit");
 
-        if (!appConfig.HasPipeSource) return;
+        if (!appConfig.HasHttpSource) return;
 
-        logger.Debug("In another terminal, you can send commands:");
-        logger.Debug("  echo -n 'v' > '$PIPE_PATH'   # toggle capture");
-        logger.Debug("  echo -n 'q' > '$PIPE_PATH'   # quit");
+        logger.Debug("In another terminal, you can send commands via HTTP:");
+        logger.Debug($"  curl -s -X POST http://localhost:{appConfig.HttpPort}/command/v   # toggle capture");
+        logger.Debug($"  curl -s -X POST http://localhost:{appConfig.HttpPort}/command/q   # quit");
     }
 }

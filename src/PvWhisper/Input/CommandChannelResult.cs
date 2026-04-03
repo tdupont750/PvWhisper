@@ -8,4 +8,4 @@ namespace PvWhisper.Input;
 public sealed record CommandChannelResult(
     Channel<char> Channel,
     Task ConsoleProducer,
-    Task? PipeProducer);
+    Task? HttpProducer);
