@@ -95,7 +95,7 @@ systemctl --user start ydotoold.service;
 ```
 ### keyd
 
-Adds support to override keyboard input. *Only available on Linux.*
+Adds support to override keyboard mappings. *Only available on Linux.*
 
 Instructions for installing keyd taken from [official GitHub repository](https://github.com/rvaiya/keyd?tab=readme-ov-file#from-source).
 
