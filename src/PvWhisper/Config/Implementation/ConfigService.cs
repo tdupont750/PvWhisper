@@ -79,7 +79,9 @@ public sealed class ConfigService : IConfigService
                 var full = Path.GetFullPath(expanded!);
                 if (!Directory.Exists(full))
                 {
-                    throw new ArgumentException($"Model directory does not exist: {full}");
+                    _logger.Warn($"Model directory does not exist: {full}");
+                    Directory.CreateDirectory(full);
+                    _logger.Info($"Created model directory: {full}");
                 }
                 config.ModelDir = full;
             }

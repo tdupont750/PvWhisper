@@ -6,7 +6,7 @@
   "language": "en",
   "modelDir": "~/WhisperModels",
   "modelType": "Base",
-  "httpPort": 5000,
+  "httpPort": 5042,
   "whisperThreads": 8,
   "frameLength": 512,
   "textTransforms": [{

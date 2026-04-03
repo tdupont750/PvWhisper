@@ -9,7 +9,7 @@ public sealed class AppConfig
 
     public int? DeviceIndex { get; set; }
     public string? DeviceName { get; set; }
-    public int HttpPort { get; set; } = 5000;
+    public int? HttpPort { get; set; }
 
     public string Language { get; set; } = "en";
 

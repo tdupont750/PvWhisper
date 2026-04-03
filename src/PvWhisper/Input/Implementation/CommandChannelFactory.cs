@@ -32,7 +32,7 @@ public sealed class CommandChannelFactory : ICommandChannelFactory
         Task? httpProducer = null;
         if (_config.HasHttpSource)
         {
-            var httpSource = new HttpCommandSource(_config.HttpPort, _logger);
+            var httpSource = new HttpCommandSource(_config.HttpPort!.Value, _logger);
             httpProducer = Task.Run(
                 () => ProduceCommandsAsync(httpSource, channel.Writer, token),
                 token);
