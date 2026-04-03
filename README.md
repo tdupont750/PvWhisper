@@ -38,11 +38,12 @@ Authored using AI via [JetBrains Junie](https://www.jetbrains.com/junie/) and [C
 
 ## Getting Started
 
-1. Install the [dotnet SDK](https://dotnet.microsoft.com/en-us/download)
-2. Clone this repository
-3. Configure via `AppConfig.json`
-4. Execute `run_pvw.sh`
-5. Toggle capture by executing `toggle_pvw.sh`
+1. Install the [dotnet SDK 10.0](https://dotnet.microsoft.com/en-us/download)
+2. Optional: ydotool and keyd (see sections below)
+3. Clone this repository
+4. Configure via `AppConfig.json`
+5. Execute `run_pvw.sh`
+6. Toggle capture by executing `toggle_pvw.sh`
 
 ## Configuration
 
@@ -70,9 +71,13 @@ Via HTTP (when `httpPort` is set in `AppConfig.json`):
 - `curl -s -X POST http://localhost:5042/command/v`   # toggle capture
 - `curl -s -X POST http://localhost:5042/command/q`   # quit
 
-## ydotool for Linux
+## Optional Integrations
 
-Instructions for installing ydotool taken from [this GitHub issue](https://github.com/ReimuNotMoe/ydotool/issues/285#issuecomment-3219166315).
+### ydotool
+
+Adds support to type via virtual keyboard. *Only available on Linux.*
+
+Instructions for installing ydotool taken from [this issue on official GitHub repository](https://github.com/ReimuNotMoe/ydotool/issues/285#issuecomment-3219166315).
 
 ```bash
 sudo apt install cmake scdoc pkg-config
@@ -87,6 +92,34 @@ sudo make install;
 systemctl daemon-reload;
 systemctl --user enable ydotoold;
 systemctl --user start ydotoold.service;
+```
+### keyd
+
+Adds support to override keyboard input. *Only available on Linux.*
+
+Instructions for installing keyd taken from [official GitHub repository](https://github.com/rvaiya/keyd?tab=readme-ov-file#from-source).
+
+```bash
+git clone https://github.com/rvaiya/keyd
+cd keyd
+make && sudo make install
+sudo systemctl enable --now keyd
+```
+
+My configuration (`/etc/keyd/default.conf`) remaps Caps Lock to a global shortcut that invokes toggle script (`toggle_pvw.sh`)
+
+```
+[ids]
+
+*
+
+[main]
+
+capslock = macro(leftcontrol+leftalt+leftshift+v)
+
+[control]
+
+capslock = capslock
 ```
 
 ## License
