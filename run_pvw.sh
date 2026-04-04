@@ -33,9 +33,7 @@ if ! pgrep -x ydotoold &>/dev/null; then
 fi
 
 # Guard against concurrent instances
-LOCK_FILE="/tmp/pvwhisper.lock"
-exec 9>"$LOCK_FILE"
-if ! flock -n 9; then
+if pgrep -f "dotnet.*PvWhisper" &>/dev/null; then
   ERROR "Another instance of PvWhisper is already running"
   exit 1
 fi
