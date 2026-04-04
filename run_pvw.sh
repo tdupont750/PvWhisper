@@ -29,8 +29,7 @@ fi
 
 # Check ydotoold daemon is running
 if ! pgrep -x ydotoold &>/dev/null; then
-  ERROR "ydotoold daemon is not running — start it with: ydotoold &"
-  exit 1
+  WARN "ydotoold daemon is not running — start it with: ydotoold &"
 fi
 
 # Guard against concurrent instances
