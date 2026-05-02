@@ -1,14 +1,12 @@
 # PvWhisper
 
-A cross-platform Speech-to-Text console application.
+Yet another cross-platform Speech-to-Text console application.
 
-Built using:
-- [dotnet](https://dotnet.microsoft.com/en-us/download)
-- [PvRecorder](https://github.com/Picovoice/pvrecorder)
-- [Whisper.net](https://github.com/sandrohanea/whisper.net)
-- [ydotool](https://github.com/ReimuNotMoe/ydotool)
+Build using [dotnet](https://dotnet.microsoft.com/en-us/download), [PvRecorder](https://github.com/Picovoice/pvrecorder), [Whisper.net](https://github.com/sandrohanea/whisper.net), [ydotool](https://github.com/ReimuNotMoe/ydotool), and [JetBrains Junie](https://www.jetbrains.com/junie/), but you should really use [Claude Code](https://claude.com/product/claude-code).
 
-Authored using AI via [JetBrains Junie](https://www.jetbrains.com/junie/) and [Claude Code](https://claude.com/product/claude-code)
+Why make yet another Speech-to-Text program? It was fun, I wanted it to just run from a console without requiring any installs, and it supports multiple outputs.
+
+![Clause](imgs/PvWhisper_small.png)
 
 ## Features
 
