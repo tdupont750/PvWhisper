@@ -87,10 +87,15 @@ git clone https://github.com/ReimuNotMoe/ydotool.git && {
   };
 };
 sudo make install;
-systemctl daemon-reload;
-systemctl --user enable ydotoold;
-systemctl --user start ydotoold.service;
+
+# DO NOT INSTALL SERVICE
+# systemctl daemon-reload;
+# systemctl --user enable ydotoold;
+# systemctl --user start ydotoold.service;
 ```
+
+The service requires root, so run `start_ydotool.sh` before starting PvWhisper
+
 ### keyd
 
 Adds support to override keyboard mappings. *Only available on Linux.*

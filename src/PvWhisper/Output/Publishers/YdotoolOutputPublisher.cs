@@ -44,6 +44,7 @@ public sealed class YdotoolOutputPublisher : IOutputPublisher
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
+            psi.EnvironmentVariables.Add("YDOTOOL_SOCKET", "/tmp/.ydotool_socket");
             psi.ArgumentList.Add("-c");
             psi.ArgumentList.Add(command);
 
